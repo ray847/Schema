@@ -1,0 +1,134 @@
+direction: right
+
+# Entity Types
+classes: {
+  base_entity: {
+    shape: sql_table
+  }
+  associative_entity: {
+    shape: sql_table
+    style: {
+      fill: "#005eff"
+      stroke: "#ffffff"
+      stroke-width: 2
+      stroke-dash: 5
+    }
+  }
+}
+
+# Entities
+Campus: {
+  class: base_entity
+  campus_id: string {constraint: primary_key}
+  name: string
+  address: string
+}
+
+Building: {
+  class: base_entity
+  building_id: string {constraint: primary_key}
+  campus_id: string {constraint: foreign_key}
+  name: string
+  type: enum
+  location: string
+}
+
+Room: {
+  class: base_entity
+  room_id: string {constraint: primary_key}
+  building_id: string {constraint: foreign_key}
+  name: string
+  type: enum
+  capacity: int
+  facility_desc: string
+}
+
+User: {
+  class: base_entity
+  user_id: string {constraint: primary_key}
+  person_id: string {constraint: foreign_key}
+  preference_id: string {constraint: foreign_key}
+}
+
+Preference: {
+  class: base_entity
+  preference_id: string {constraint: primary_key}
+  prefer_power_outlet: boolean
+}
+
+Person: {
+  class: base_entity
+  person_id: string {constraint: primary_key}
+  name: string
+  role: enum
+}
+
+Course: {
+  class: base_entity
+  course_id: string {constraint: primary_key}
+  name: string
+}
+
+Activity: {
+  class: base_entity
+  activity_id: string {constraint: primary_key}
+  person_id: string {constraint: foreign_key}
+  name: string
+}
+
+# Relationships
+
+rel_Enrollment: {
+  class: associative_entity
+  user_id: string {constraint: foreign_key}
+  course_id: string {constraint: foreign_key}
+}
+
+rel_Course_Teacher: {
+  class: associative_entity
+  person_id: string {constraint: foreign_key}
+  course_id: string {constraint: foreign_key}
+  responsibility_desc: string
+}
+
+rel_Allocation: {
+  class: associative_entity
+  allocation_id: string {constraint: primary_key}
+  room_id: string {constraint: foreign_key}
+  ref_id: string
+  ref_type: enum
+  day_of_week: int
+  start: time
+  end: time
+}
+
+# ==========================================
+# 4. 实体级与列级关系连线 (Relationships)
+# ==========================================
+
+# 空间包含关系
+Building.campus_id -> Campus.campus_id : Contain
+Room.building_id -> Building.building_id : Contain
+
+# 人员与用户关系
+User.person_id -> Person.person_id : Is
+User.preference_id -> Preference.preference_id : Have
+Activity.person_id -> Person.person_id : Host
+
+# M:N 中间表连线（精确到列关联）
+rel_Enrollment.user_id -> User.user_id : Take
+rel_Enrollment.course_id -> Course.course_id : Taken by
+
+rel_Course_Teacher.person_id -> Person.person_id : Teach
+rel_Course_Teacher.course_id -> Course.course_id : Taught by
+
+# 排期表连线
+rel_Allocation.room_id -> Room.room_id : Host
+
+# 针对多态外键（Polymorphic FK），采用表级别的虚线连接
+rel_Allocation -> Course : "ref_id (当 ref_type 为 Course 时)" {
+  style: { stroke-dash: 5; opacity: 0.6 }
+}
+rel_Allocation -> Activity : "ref_id (当 ref_type 为 Activity 时)" {
+  style: { stroke-dash: 5; opacity: 0.6 }
+}

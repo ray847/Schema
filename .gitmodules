@@ -1,0 +1,3 @@
+[submodule "doc/TypstTemplate"]
+	path = doc/TypstTemplate
+	url = https://github.com/ray847/TypstTemplate.git
