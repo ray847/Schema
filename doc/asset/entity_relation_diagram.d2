@@ -19,15 +19,15 @@ classes: {
 # Entities
 Campus: {
   class: base_entity
-  campus_id: string {constraint: primary_key}
+  campus_id: int {constraint: primary_key}
   name: string
   address: string
 }
 
 Building: {
   class: base_entity
-  building_id: string {constraint: primary_key}
-  campus_id: string {constraint: foreign_key}
+  building_id: int {constraint: primary_key}
+  campus_id: int {constraint: foreign_key}
   name: string
   type: enum
   location: string
@@ -35,60 +35,68 @@ Building: {
 
 Room: {
   class: base_entity
-  room_id: string {constraint: primary_key}
-  building_id: string {constraint: foreign_key}
+  room_id: int {constraint: primary_key}
+  building_id: int {constraint: foreign_key}
   name: string
   type: enum
   capacity: int
   facility_desc: string
 }
 
-User: {
+Facility: {
   class: base_entity
-  user_id: string {constraint: primary_key}
-  person_id: string {constraint: foreign_key}
-  preference_id: string {constraint: foreign_key}
+  power_outlet: INTEGER
 }
 
-Preference: {
+User: {
   class: base_entity
-  preference_id: string {constraint: primary_key}
-  prefer_power_outlet: boolean
+  user_id: int {constraint: primary_key}
+  person_id: int {constraint: foreign_key}
+  type: enum
 }
 
 Person: {
   class: base_entity
-  person_id: string {constraint: primary_key}
+  person_id: int {constraint: primary_key}
+  person_code: string
   name: string
   role: enum
 }
 
 Course: {
   class: base_entity
-  course_id: string {constraint: primary_key}
+  course_id: int {constraint: primary_key}
+  course_code: string
   name: string
 }
 
 Activity: {
   class: base_entity
-  activity_id: string {constraint: primary_key}
-  person_id: string {constraint: foreign_key}
+  activity_id: int {constraint: primary_key}
   name: string
+  person_id: int {constraint: foreign_key}
 }
 
 # Relationships
 
 rel_Enrollment: {
   class: associative_entity
-  user_id: string {constraint: foreign_key}
-  course_id: string {constraint: foreign_key}
+  person_id: int {constraint: foreign_key}
+  course_id: int {constraint: foreign_key}
 }
 
 rel_Course_Teacher: {
   class: associative_entity
-  person_id: string {constraint: foreign_key}
-  course_id: string {constraint: foreign_key}
+  person_id: int {constraint: foreign_key}
+  course_id: int {constraint: foreign_key}
   responsibility_desc: string
+}
+
+rel_User_Preference: {
+  class: associative_entity
+  user_id: int {constraint: foreign_key}
+  room_id: int {constraint: foreign_key}
+  level: int
 }
 
 rel_Allocation: {
@@ -107,28 +115,71 @@ rel_Allocation: {
 # ==========================================
 
 # 空间包含关系
-Building.campus_id -> Campus.campus_id : Contain
-Room.building_id -> Building.building_id : Contain
+Building.campus_id <-> Campus.campus_id: Contain {
+  source-arrowhead.shape: cf-many-required
+  target-arrowhead.shape: cf-one-required
+}
+Room.building_id <-> Building.building_id: Contain {
+  source-arrowhead.shape: cf-many-required
+  target-arrowhead.shape: cf-one-required
+}
+Room <-> Facility: Have {
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one-required
+}
 
 # 人员与用户关系
-User.person_id -> Person.person_id : Is
-User.preference_id -> Preference.preference_id : Have
-Activity.person_id -> Person.person_id : Host
+User.person_id <-> Person.person_id: Is {
+  source-arrowhead.shape: cf-one
+  target-arrowhead.shape: cf-one-required
+}
+Activity.person_id <-> Person.person_id : Host {
+  source-arrowhead.shape: cf-many-required
+  target-arrowhead.shape: cf-many-required
+}
 
 # M:N 中间表连线（精确到列关联）
-rel_Enrollment.user_id -> User.user_id : Take
-rel_Enrollment.course_id -> Course.course_id : Taken by
+rel_Enrollment.person_id <-> Person.person_id : Take {
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one-required
+}
+rel_Enrollment.course_id <-> Course.course_id : Taken by {
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one-required
+}
 
-rel_Course_Teacher.person_id -> Person.person_id : Teach
-rel_Course_Teacher.course_id -> Course.course_id : Taught by
+rel_Course_Teacher.person_id <-> Person.person_id : Teach {
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one-required
+}
+rel_Course_Teacher.course_id <-> Course.course_id : Taught by {
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one-required
+}
+
+rel_User_Preference.user_id <-> User.user_id : Have {
+  source-arrowhead.shape: cf-many
+  target-arrowhead.shape: cf-one-required
+}
+rel_User_Preference.room_id <-> Room.room_id : Of {
+  source-arrowhead.shape: cf-many
+  target-arrowhead.shape: cf-one-required
+}
 
 # 排期表连线
-rel_Allocation.room_id -> Room.room_id : Host
+rel_Allocation.room_id <-> Room.room_id : Host {
+  source-arrowhead.shape: cf-many-required
+  target-arrowhead.shape: cf-one-required
+}
 
 # 针对多态外键（Polymorphic FK），采用表级别的虚线连接
-rel_Allocation -> Course : "ref_id (当 ref_type 为 Course 时)" {
+rel_Allocation <-> Course : "ref_id (当 ref_type 为 Course 时)" {
   style: { stroke-dash: 5; opacity: 0.6 }
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one
 }
-rel_Allocation -> Activity : "ref_id (当 ref_type 为 Activity 时)" {
+rel_Allocation <-> Activity : "ref_id (当 ref_type 为 Activity 时)" {
   style: { stroke-dash: 5; opacity: 0.6 }
+  source-arrowhead.shape: cf-one-required
+  target-arrowhead.shape: cf-one
 }

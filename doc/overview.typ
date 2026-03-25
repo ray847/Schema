@@ -3,7 +3,7 @@
 #show: formal
 
 #set document(
-  title: "复旦百事通：智能行程规划与问答系统",
+  title: "Schema\n基于复旦万事通的智能行程规划与问答系统",
   author: "夏澄奕 24302010011",
   date: datetime.today()
 )
@@ -39,19 +39,19 @@
 为了解决该最优化问题，我们使用整形规划来进行求解。
 
 $
-  max_(x_(i, j)) -cal(D) + cal(I) + cal(P)
+  max_(x_(i, j)) -cal(D) + cal(F) + cal(P)
 $
 where
 $
   "Distance: " cal(D) = sum_(i, j) ||r_(i,  j), r_(i, j + 1)||
   \
-  "Infrastructure: " cal(I) = sum_(i, j) cal(I)(r_(i, j))t_(i, j)
+  "Facility: " cal(F) = sum_(i, j) cal(F)(r_(i, j))t_(i, j)
   \
   "Preference: " cal(P) = sum_(i, j) cal(P)(r_(i, j))t_(i, j)
 $
 $
   s.t. \
-  cal(I) > cal(I)_min
+  cal(F) > cal(F)_min
   \
   forall i, (x_(i, 0) = x_"class" or x_(i, 0) = x_"event")
   \
@@ -70,5 +70,5 @@ $
 
 #figure(
   image("asset/entity_relation_diagram.svg"),
-  caption: [Database Entity Relationship Diagram]
+  caption: [Entity Relationship Diagram]
 )<er_diagram>
