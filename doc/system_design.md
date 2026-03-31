@@ -2,7 +2,7 @@
 
 ## 数据库设计
 
-![ER](entity_diagram.svg)
+![ER](asset/entity_relation_diagram.svg)
 
 ### 核心实体说明
 * **空间域**：校区（ID、名称、地址）、建筑（ID、名称、类型、坐标）、房间（ID、容量、设施描述）。
