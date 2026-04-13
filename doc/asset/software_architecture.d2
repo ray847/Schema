@@ -1,0 +1,35 @@
+direction: down
+
+frontend.Static -> backend.api.CRUD: Hard Coded GraphQL
+frontend.Dynamic -> backend.api.CRUD: Generated GraphQL
+
+backend: {
+  api.CRUD -> core.Interface
+  core.Execution -> db.Interface.Public
+  core.Verification -> db.Interface.User
+  api: {
+    CRUD: CRUD Request \n User Key & GraphQL
+  }
+  core: {
+    Interface -> Verification: User Key
+    Interface -> Execution: GraphQL
+    Verification -> Execution: User Priviledge
+    Interface: CRUD Interface
+    Verification: Priviledge Verification
+    Execution: Execution \n (GraphQL)
+  }
+  db: {
+    Interface.Public -> SQLite3
+    Interface.User -> SQLite3
+    Interface: {
+      Public: Public Info Interface
+      User: User Info Interface
+    }
+    SQLite3
+  }
+}
+
+frontend: {
+  Static: Static Request
+  Dynamic: Dynamic Request
+}

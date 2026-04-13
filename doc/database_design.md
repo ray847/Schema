@@ -50,6 +50,8 @@
 | :--- | :--- | :--- | :--- |
 | `user_id` | INTEGER | **PRIMARY KEY** | |
 | `person_id` | INTEGER | **FOREIGN KEY**, **UNIQUE**, NOT NULL | Associated person |
+| `email` | VARCHAR | **UNIQUE**, NOT NULL| |
+| `password` | VARCHAR | NOT NULL | Encripted password |
 | `type` | VARCHAR | E.g. User, Admin, etc. |
 
 ## Business Entities

@@ -1,8 +1,5 @@
 # TODO
 
-# Before Next CheckPoint
-
-* ~~Project Description~~
-* ~~Requirement Analysis~~
-* ~~Concept Design~~
-* ~~Entity Relationship Diagram~~
+* Implement priviledges model.
+  * User system
+  * Admin edits

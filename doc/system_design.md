@@ -21,4 +21,15 @@
 
 ## 架构设计
 
-TODO
+### ToolChain
+
+* SQLite3: For Database operation.
+* FastAPI: For client-server communication.
+* GraphQL(Strawberry): For secure client-side database queries.
+* Streamlit: For web frontend.
+
+### Backend
+
+#### DB
+
+Functional Programming

@@ -79,12 +79,6 @@ Activity: {
 
 # Relationships
 
-rel_Enrollment: {
-  class: associative_entity
-  person_id: int {constraint: foreign_key}
-  course_id: int {constraint: foreign_key}
-}
-
 rel_Course_Teacher: {
   class: associative_entity
   person_id: int {constraint: foreign_key}
@@ -133,53 +127,44 @@ User.person_id <-> Person.person_id: Is {
   source-arrowhead.shape: cf-one
   target-arrowhead.shape: cf-one-required
 }
-Activity.person_id <-> Person.person_id : Host {
+Activity.person_id <-> Person.person_id: Host {
   source-arrowhead.shape: cf-many-required
   target-arrowhead.shape: cf-many-required
 }
 
 # M:N 中间表连线（精确到列关联）
-rel_Enrollment.person_id <-> Person.person_id : Take {
+rel_Course_Teacher.person_id <-> Person.person_id: Teach {
   source-arrowhead.shape: cf-one-required
   target-arrowhead.shape: cf-one-required
 }
-rel_Enrollment.course_id <-> Course.course_id : Taken by {
-  source-arrowhead.shape: cf-one-required
-  target-arrowhead.shape: cf-one-required
-}
-
-rel_Course_Teacher.person_id <-> Person.person_id : Teach {
-  source-arrowhead.shape: cf-one-required
-  target-arrowhead.shape: cf-one-required
-}
-rel_Course_Teacher.course_id <-> Course.course_id : Taught by {
+rel_Course_Teacher.course_id <-> Course.course_id: Taught by {
   source-arrowhead.shape: cf-one-required
   target-arrowhead.shape: cf-one-required
 }
 
-rel_User_Preference.user_id <-> User.user_id : Have {
+rel_User_Preference.user_id <-> User.user_id: Have {
   source-arrowhead.shape: cf-many
   target-arrowhead.shape: cf-one-required
 }
-rel_User_Preference.room_id <-> Room.room_id : Of {
+rel_User_Preference.room_id <-> Room.room_id: Of {
   source-arrowhead.shape: cf-many
   target-arrowhead.shape: cf-one-required
 }
 
 # 排期表连线
-rel_Allocation.room_id <-> Room.room_id : Host {
+rel_Allocation.room_id <-> Room.room_id: Host {
   source-arrowhead.shape: cf-many-required
   target-arrowhead.shape: cf-one-required
 }
 
 # 针对多态外键（Polymorphic FK），采用表级别的虚线连接
-rel_Allocation <-> Course : "ref_id (当 ref_type 为 Course 时)" {
-  style: { stroke-dash: 5; opacity: 0.6 }
+rel_Allocation <-> Course: "ref_id (当 ref_type 为 Course 时)" {
+  style: {stroke-dash: 5; opacity: 0.6}
   source-arrowhead.shape: cf-one-required
   target-arrowhead.shape: cf-one
 }
-rel_Allocation <-> Activity : "ref_id (当 ref_type 为 Activity 时)" {
-  style: { stroke-dash: 5; opacity: 0.6 }
+rel_Allocation <-> Activity: "ref_id (当 ref_type 为 Activity 时)" {
+  style: {stroke-dash: 5; opacity: 0.6}
   source-arrowhead.shape: cf-one-required
   target-arrowhead.shape: cf-one
 }
