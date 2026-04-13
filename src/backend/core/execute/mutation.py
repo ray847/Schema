@@ -92,3 +92,32 @@ class Mutation:
             Key[Literal["Room"]](key), filtered
         )
         _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def delete_campus(
+        self,
+        key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        view = db.View(db.TableRegistry.CAMPUS).pop(Key[Literal["Campus"]](key))
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def delete_building(
+        self,
+        key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        view = db.View(db.TableRegistry.BUILDING).pop(
+            Key[Literal["Building"]](key)
+        )
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def delete_room(
+        self,
+        key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        view = db.View(db.TableRegistry.ROOM).pop(Key[Literal["Room"]](key))
+        _ = await info.context.db_context.execute(view)

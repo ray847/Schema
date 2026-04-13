@@ -4,6 +4,7 @@ from .filter_view import FilterView
 from .select_view import SelectView
 from .append_view import AppendView
 from .replace_view import ReplaceView
+from .pop_view import PopView
 from .sql_command import SQLCommand
 import backend.shared as shared
 
@@ -30,6 +31,13 @@ class View:
     def replace(self, key: shared.Key, replacements: dict) -> "View":
         if isinstance(self.view, TableView):
             self.view = ReplaceView(self.view, key, replacements)
+        else:
+            raise Exception("Replace is only applicable to table views.")
+        return self
+
+    def pop(self, key: shared.Key) -> "View":
+        if isinstance(self.view, TableView):
+            self.view = PopView(self.view, key)
         else:
             raise Exception("Replace is only applicable to table views.")
         return self
