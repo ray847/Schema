@@ -3,7 +3,9 @@ from .table_view import TableView
 from .filter_view import FilterView
 from .select_view import SelectView
 from .append_view import AppendView
+from .replace_view import ReplaceView
 from .sql_command import SQLCommand
+import backend.shared as shared
 
 
 class View:
@@ -23,6 +25,13 @@ class View:
             self.view = AppendView(self.view, val)
         else:
             raise Exception("Append is only applicable to table views.")
+        return self
+
+    def replace(self, key: shared.Key, replacements: dict) -> "View":
+        if isinstance(self.view, TableView):
+            self.view = ReplaceView(self.view, key, replacements)
+        else:
+            raise Exception("Replace is only applicable to table views.")
         return self
 
     @property
