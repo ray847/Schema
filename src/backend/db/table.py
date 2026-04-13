@@ -1,6 +1,6 @@
 from typing import Optional, Type, Any, get_origin, get_args, Union
 from pydantic import BaseModel
-import shared
+import backend.shared as shared
 
 
 def model_table_name(model: Type[BaseModel]) -> str:
@@ -65,13 +65,13 @@ class Table:
             # Append the foreign key constraint.
             # Note: We assume the target table uses 'id' as its primary key column.
             col_defs.append(
-                f"FOREIGN KEY ({fk_col_name}) REFERENCES {fk_table_name}(id) ON DELETE CASCADE"
+                f"FOREIGN KEY ({fk_col_name}) REFERENCES {fk_table_name}(key) ON DELETE CASCADE"
             )
 
         sql = (
             f"CREATE TABLE IF NOT EXISTS {self.name} (\n  "
             + ",\n  ".join(col_defs)
-            + "\n)"
+            + "\n);"
         )
         return sql
 

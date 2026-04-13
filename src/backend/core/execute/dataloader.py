@@ -1,7 +1,7 @@
 from typing import List, Literal
 import strawberry
 import strawberry.dataloader
-import shared.model
+import backend.shared as shared
 import backend.db as db
 
 

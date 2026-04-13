@@ -1,7 +1,7 @@
 from typing import Literal
 import pydantic
 import strawberry
-from shared.key import Key
+from backend.shared.key import Key
 
 
 """Pydantic Models"""
@@ -24,7 +24,7 @@ class CampusResponse(CampusBase):
 
 
 @strawberry.experimental.pydantic.type(model=CampusResponse, all_fields=True)
-class CampusType:
+class CampusModel:
     key: strawberry.ID
 
 

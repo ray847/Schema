@@ -5,11 +5,12 @@ from .context import DBContext
 
 
 def setup():
-    sql_schema: str = TableRegistry.generate_sql_schema()
+    sql_schema = TableRegistry.generate_sql_schema()
     context = DBContext()
     # Directly execute schema.
-    print(sql_schema)
-    context.conn.execute(sql_schema)
+    for statement in sql_schema:
+        context.conn.execute(statement)
+        print(statement)
     if settings.debug:
         insert_mock_data(conn=context.conn)
     context.conn.commit()
@@ -29,37 +30,37 @@ def insert_mock_data(conn: sqlite3.Connection):
         ("Downtown Campus", "456 City Ave"),
     )
 
-    # # Building
-    # conn.execute(
-    #     "INSERT INTO Building (campus_id, name, type, location) VALUES (?, ?, ?, ?)",
-    #     (1, "Engineering Hall", "Academic", "North Wing"),
-    # )
-    # conn.execute(
-    #     "INSERT INTO Building (campus_id, name, type, location) VALUES (?, ?, ?, ?)",
-    #     (1, "Library", "Library", "Central"),
-    # )
-    # conn.execute(
-    #     "INSERT INTO Building (campus_id, name, type, location) VALUES (?, ?, ?, ?)",
-    #     (2, "Business Center", "Academic", "East Side"),
-    # )
+    # Building
+    conn.execute(
+        "INSERT INTO Building (campus_key, name, building_type, location) VALUES (?, ?, ?, ?)",
+        (1, "Engineering Hall", "academic", "North Wing"),
+    )
+    conn.execute(
+        "INSERT INTO Building (campus_key, name, building_type, location) VALUES (?, ?, ?, ?)",
+        (1, "Library", "library", "Central"),
+    )
+    conn.execute(
+        "INSERT INTO Building (campus_key, name, building_type, location) VALUES (?, ?, ?, ?)",
+        (2, "Business Center", "academic", "East Side"),
+    )
 
-    # # Room
-    # conn.execute(
-    #     "INSERT INTO Room (building_id, name, type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-    #     (1, "101", "Lecture", 50, 10.0),
-    # )
-    # conn.execute(
-    #     "INSERT INTO Room (building_id, name, type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-    #     (1, "102", "Lab", 30, 20.0),
-    # )
-    # conn.execute(
-    #     "INSERT INTO Room (building_id, name, type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-    #     (2, "Reading Room", "Study", 100, 5.0),
-    # )
-    # conn.execute(
-    #     "INSERT INTO Room (building_id, name, type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-    #     (3, "201", "Office", 10, 15.0),
-    # )
+    # Room
+    conn.execute(
+        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
+        (1, "101", "lecture", 50, 10.0),
+    )
+    conn.execute(
+        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
+        (1, "102", "laboratory", 30, 20.0),
+    )
+    conn.execute(
+        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
+        (2, "Reading Room", "lecture", 100, 5.0),
+    )
+    conn.execute(
+        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
+        (3, "201", "office", 10, 15.0),
+    )
 
     # # Person
     # conn.execute(

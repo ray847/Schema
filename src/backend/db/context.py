@@ -10,6 +10,9 @@ class DBContext:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON;")
 
+    def __del__(self):
+        self.conn.close()
+
     async def execute(self, view: View):
         def run_sql(view):
             conn = sqlite3.connect(settings.db_filepath)

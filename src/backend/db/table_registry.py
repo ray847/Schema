@@ -1,25 +1,23 @@
 import enum
-import shared
+import backend.shared as shared
 from .table import Table
 
 
 class TableRegistry(enum.Enum):
     CAMPUS = Table(primary_model=shared.model.CampusResponse)
-    # BUILDING = Table(
-    #     priviledge=PUBLIC_PRIVILEDGE,
-    #     primary_model=Building,
-    #     foreign_models=(Campus,),
-    # )
-    # ROOM = Table(
-    #     priviledge=PUBLIC_PRIVILEDGE,
-    #     primary_model=Room,
-    #     foreign_models=(Building,),
-    # )
+    BUILDING = Table(
+        primary_model=shared.model.BuildingResponse,
+        foreign_models=(shared.model.CampusResponse,),
+    )
+    ROOM = Table(
+        primary_model=shared.model.RoomResponse,
+        foreign_models=(shared.model.BuildingResponse,),
+    )
     # USER = Table(priviledge=PRIVATE_PRIVILEDGE, primary_model=User)
 
     @staticmethod
-    def generate_sql_schema() -> str:
-        schema: str = ""
+    def generate_sql_schema() -> list[str]:
+        schema: list[str] = []
         for table in TableRegistry:
-            schema += table.value.get_create_sql() + "\n"
+            schema.append(table.value.get_create_sql())
         return schema
