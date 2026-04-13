@@ -6,6 +6,7 @@ from .building import (
     BuildingInput,
 )
 from .room import RoomCreate, RoomResponse, RoomModel, RoomInput
+from .facility import Facility
 
 __all__ = [
     "CampusCreate",
@@ -20,4 +21,5 @@ __all__ = [
     "RoomResponse",
     "RoomModel",
     "RoomInput",
+    "Facility",
 ]

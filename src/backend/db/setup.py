@@ -1,5 +1,7 @@
 import sqlite3
 from backend.settings import settings
+import backend.shared as shared
+from backend.shared.model.facility import Facility
 from .table_registry import TableRegistry
 from .context import DBContext
 
@@ -32,34 +34,48 @@ def insert_mock_data(conn: sqlite3.Connection):
 
     # Building
     conn.execute(
-        "INSERT INTO Building (campus_key, name, building_type, location) VALUES (?, ?, ?, ?)",
+        """
+INSERT INTO Building (campus_key, name, building_type, location)
+VALUES (?, ?, ?, ?)""",
         (1, "Engineering Hall", "academic", "North Wing"),
     )
     conn.execute(
-        "INSERT INTO Building (campus_key, name, building_type, location) VALUES (?, ?, ?, ?)",
+        """
+INSERT INTO Building (campus_key, name, building_type, location)
+VALUES (?, ?, ?, ?)""",
         (1, "Library", "library", "Central"),
     )
     conn.execute(
-        "INSERT INTO Building (campus_key, name, building_type, location) VALUES (?, ?, ?, ?)",
+        """
+INSERT INTO Building (campus_key, name, building_type, location)
+VALUES (?, ?, ?, ?)""",
         (2, "Business Center", "academic", "East Side"),
     )
 
     # Room
     conn.execute(
-        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-        (1, "101", "lecture", 50, 10.0),
+        """
+INSERT INTO Room (building_key, name, room_type, capacity, facility)
+VALUES (?, ?, ?, ?, ?)""",
+        (1, "101", "lecture", 50, Facility(power_outlet=10.0).model_dump_json()),
     )
     conn.execute(
-        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-        (1, "102", "laboratory", 30, 20.0),
+        """
+INSERT INTO Room (building_key, name, room_type, capacity, facility)
+VALUES (?, ?, ?, ?, ?)""",
+        (1, "102", "laboratory", 30, Facility(power_outlet=20.0).model_dump_json()),
     )
     conn.execute(
-        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-        (2, "Reading Room", "lecture", 100, 5.0),
+        """
+INSERT INTO Room (building_key, name, room_type, capacity, facility)
+VALUES (?, ?, ?, ?, ?)""",
+        (2, "Reading Room", "lecture", 100, Facility(power_outlet=5.0).model_dump_json()),
     )
     conn.execute(
-        "INSERT INTO Room (building_key, name, room_type, capacity, power_outlet) VALUES (?, ?, ?, ?, ?)",
-        (3, "201", "office", 10, 15.0),
+        """
+INSERT INTO Room (building_key, name, room_type, capacity, facility)
+VALUES (?, ?, ?, ?, ?)""",
+        (3, "201", "office", 10, Facility(power_outlet=15.0).model_dump_json()),
     )
 
     # # Person

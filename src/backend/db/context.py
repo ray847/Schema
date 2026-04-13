@@ -14,11 +14,16 @@ class DBContext:
         self.conn.close()
 
     async def execute(self, view: View):
-        def run_sql(view):
+        def run_sql(view: View):
             conn = sqlite3.connect(settings.db_filepath)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON;")
-            result = conn.execute(view.sql).fetchall()
+            result = None
+            for command in view.sql:
+                result = conn.execute(
+                    command.format, command.arguments
+                ).fetchall()
+            conn.commit()
             conn.close()
             return result
 

@@ -1,4 +1,5 @@
 from .table_registry import TableRegistry
+from .sql_command import SQLCommand
 
 
 class TableView:
@@ -6,8 +7,8 @@ class TableView:
         self.table = table
 
     @property
-    def sql(self) -> str:
-        return f"SELECT * FROM {self.table.value.name}"
+    def sql(self) -> list[SQLCommand]:
+        return [SQLCommand(f"SELECT * FROM {self.table.value.name}", ())]
 
     # @property
     # def priviledge(self) -> shared.Priviledge:

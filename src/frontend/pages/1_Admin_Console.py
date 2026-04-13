@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import shared
 
 if "server_url" not in st.session_state:
     st.session_state.server_url = "http://127.0.0.1:8000"

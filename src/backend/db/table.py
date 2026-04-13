@@ -104,6 +104,10 @@ class Table:
         elif origin is float:
             return "REAL"
 
+        # 4. Handle Pydantic models as JSON
+        if isinstance(origin, type) and issubclass(origin, BaseModel):  # type: ignore
+            return "JSON"
+
         return "TEXT"
 
 
