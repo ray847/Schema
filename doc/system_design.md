@@ -23,10 +23,21 @@
 
 ### ToolChain
 
+**API**:
+* GraphQL: Database operations.
+
+**Backend**:
+* Python: Programming Language.
 * SQLite3: For Database operation.
 * FastAPI: For client-server communication.
-* GraphQL(Strawberry): For secure client-side database queries.
-* Streamlit: For web frontend.
+* Strawberry(GraphQL): For creating the GraphQL schema & decoding client queries.
+
+**Frontend**:
+* TypeScript: Programming Language.
+* React: GUI framework.
+* Vite: Build system.
+* Apollo Client: For sending queries.
+* GraphQL Code Generator: For generating code from server GraphQL schema.
 
 ### Backend
 

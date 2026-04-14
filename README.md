@@ -17,7 +17,12 @@
 │   ├── asset/                  # D2 源码与渲染生成的 SVG 图表 (ER图/流程图)
 │   └── ...
 │
-├── src/                        # 源代码
+├── backend/                    # 后端
+│   └── src/                    # 源代码
+│
+├── frontend/                   # 前端源代码
+│   ├── src/                    # 源代码
+│   └── ...
 │
 ├── checkpoint.md               # 阶段交付导航
 ├── README.md
@@ -25,7 +30,18 @@
 ```
 
 ## 技术栈 (Tech Stack)
+    **API**:
+    * GraphQL: Database operations.
 
-  * **数据库**: SQLite3 (原生 SQL + SQLAlchemy)
-  * **后端**: FastAPI (Python)
-  * **前端**: Streamlit
+    **Backend**:
+    * Python: Programming Language.
+    * SQLite3: For Database operation.
+    * FastAPI: For client-server communication.
+    * Strawberry(GraphQL): For creating the GraphQL schema & decoding client queries.
+
+    **Frontend**:
+    * TypeScript: Programming Language.
+    * React: GUI framework.
+    * Vite: Build system.
+    * Apollo Client: For sending queries.
+    * GraphQL Code Generator: For generating code from server GraphQL schema.
