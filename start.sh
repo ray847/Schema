@@ -1,5 +1,5 @@
 #!/bin/bash
-DB_FILE="db_file.db"
+DB_FILE="backend/srd/db_file.db"
 
 if [ "$1" == "backend" ]; then
     if [ "$2" == "--clean" ]; then
