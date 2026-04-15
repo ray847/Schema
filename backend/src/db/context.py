@@ -6,7 +6,10 @@ import asyncio
 
 class DBContext:
     def __init__(self) -> None:
-        self.conn = sqlite3.connect(settings.db_filepath)
+        self.conn = sqlite3.connect(
+            settings.db_filepath,
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON;")
 
@@ -15,7 +18,10 @@ class DBContext:
 
     async def execute(self, view: View):
         def run_sql(view: View):
-            conn = sqlite3.connect(settings.db_filepath)
+            conn = sqlite3.connect(
+                settings.db_filepath,
+                detect_types=sqlite3.PARSE_DECLTYPES,
+            )
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON;")
             result = None

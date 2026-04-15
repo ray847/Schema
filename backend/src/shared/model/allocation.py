@@ -1,3 +1,4 @@
+import datetime
 from typing import Literal, TYPE_CHECKING, Annotated
 from enum import StrEnum
 import pydantic
@@ -21,8 +22,8 @@ class AllocationBase(pydantic.BaseModel):
     room_key: Key[Literal["Room"]]
     event_type: EventType
     event_key: int
-    start_time: str
-    end_time: str
+    start_time: datetime.datetime
+    end_time: datetime.datetime
 
 
 class AllocationCreate(AllocationBase):

@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 from settings import settings
 from shared.model.facility import Facility
 from .table_registry import TableRegistry
@@ -10,6 +11,8 @@ def setup():
     context = DBContext()
     # Directly execute schema.
     for statement in sql_schema:
+        if settings.debug:
+            print(statement)
         context.conn.execute(statement)
     if settings.debug:
         insert_mock_data(conn=context.conn)
@@ -59,9 +62,9 @@ VALUES (?, ?, ?, ?, ?)""",
     )
     conn.execute(
         """
-INSERT INTO Room (building_key, name, room_type, capacity, facility)
-VALUES (?, ?, ?, ?, ?)""",
-        (1, "102", "laboratory", 30, Facility(power_outlet=20.0).model_dump_json()),
+INSERT INTO Room (building_key, name, room_type, capacity)
+VALUES (?, ?, ?, ?)""",
+        (1, "102", "laboratory", 30),
     )
     conn.execute(
         """
@@ -123,11 +126,11 @@ VALUES (?, ?, ?, ?, ?)""",
     # Allocation
     conn.execute(
         "INSERT INTO Allocation (room_key, event_type, event_key, start_time, end_time) VALUES (?, ?, ?, ?, ?)",
-        (1, "Course", 1, "09:00", "10:30"),
+        (1, "Course", 1, datetime(2024, 4, 15, 9, 0, 0), datetime(2024, 4, 15, 10, 30, 0)),
     )
     conn.execute(
         "INSERT INTO Allocation (room_key, event_type, event_key, start_time, end_time) VALUES (?, ?, ?, ?, ?)",
-        (2, "Activity", 1, "14:00", "16:00"),
+        (2, "Activity", 1, datetime(2024, 4, 15, 14, 0, 0), datetime(2024, 4, 15, 16, 0, 0)),
     )
 
     conn.commit()

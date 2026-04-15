@@ -1,6 +1,8 @@
+import datetime
 from typing import Optional, Type, Any, get_origin, get_args, Union
 from pydantic import BaseModel
 import shared as shared
+from shared import key
 
 
 def model_table_name(model: Type[BaseModel]) -> str:
@@ -21,6 +23,8 @@ class Table:
         name: Optional[str] = None,
         foreign_models: Optional[tuple[Type[BaseModel], ...]] = None,
         primary_keys: Optional[tuple[str, ...]] = None,
+        attr: dict[str, str] = {},
+        constraints: list[str] = [],
     ):
         self.primary_model = primary_model
         self.name = model_table_name(primary_model) if primary_model else name
@@ -33,6 +37,8 @@ class Table:
             self.fields = ()
 
         self.foreign_models = foreign_models if foreign_models else ()
+        self.attr: dict[str, str] = attr
+        self.constraint = constraints
 
     def get_create_sql(self) -> str:
         """Generate CREATE TABLE SQL dynamically based on Pydantic fields."""
@@ -49,13 +55,16 @@ class Table:
 
                 col = f"{field_name} {sql_type}"
 
-                # Detect Primary Key: If the field is named 'key' AND we haven't specified primary_keys
+                # Detect Primary Key: If the field is named 'key' AND
+                # we haven't specified primary_keys
                 if field_name == "key" and not self.primary_keys:
                     col += " PRIMARY KEY AUTOINCREMENT"
+                elif field_name in self.attr.keys():
+                    col += ' ' + self.attr[field_name]
 
                 col_defs.append(col)
 
-        # Handle Foreign Keys (Add CONSTRAINTS, but don't inject columns if they already exist)
+        # Handle Foreign Keys
         for foreign_model in self.foreign_models:
             fk_table_name = model_table_name(foreign_model)
             # or whatever shared.Key[foreign_model].name outputs
@@ -66,7 +75,6 @@ class Table:
                 col_defs.append(f"{fk_col_name} INTEGER")
 
             # Append the foreign key constraint.
-            # Note: We assume the target table uses 'id' as its primary key column.
             col_defs.append(
                 f"FOREIGN KEY ({fk_col_name}) REFERENCES {
                     fk_table_name}(key) ON DELETE CASCADE"
@@ -77,14 +85,16 @@ class Table:
 
         sql = (
             f"CREATE TABLE IF NOT EXISTS {self.name} (\n  "
-            + ",\n  ".join(col_defs)
+            + ",\n  ".join(col_defs + self.constraint)
             + "\n);"
         )
         return sql
 
     @staticmethod
     def _python_to_sqlite(py_type: Any) -> str:
-        """Safely convert Python/Pydantic types to SQLite types, handling generics and Optionals."""
+        """Safely convert Python/Pydantic types to SQLite types,
+        handling generics and Optionals.
+        """
         origin = get_origin(py_type) or py_type
 
         # 1. Handle Optional types (e.g., int | None, Optional[str])
@@ -110,9 +120,11 @@ class Table:
             return "INTEGER"
         elif origin is float:
             return "REAL"
+        elif origin is datetime.datetime:
+            return "TIMESTAMP"
 
         # 4. Handle Pydantic models as JSON
-        if isinstance(origin, type) and issubclass(origin, BaseModel):
+        if isinstance(origin, type)and issubclass(origin, BaseModel):  # type: ignore
             return "JSON"
 
         return "TEXT"

@@ -30,18 +30,19 @@
 ```
 
 ## 技术栈 (Tech Stack)
-    **API**:
-    * GraphQL: Database operations.
 
-    **Backend**:
-    * Python: Programming Language.
-    * SQLite3: For Database operation.
-    * FastAPI: For client-server communication.
-    * Strawberry(GraphQL): For creating the GraphQL schema & decoding client queries.
+**API**:
+* GraphQL: Database operations.
 
-    **Frontend**:
-    * TypeScript: Programming Language.
-    * React: GUI framework.
-    * Vite: Build system.
-    * Apollo Client: For sending queries.
-    * GraphQL Code Generator: For generating code from server GraphQL schema.
+**Backend**:
+* Python: Programming Language.
+* SQLite3: For Database operation.
+* FastAPI: For client-server communication.
+* Strawberry(GraphQL): For creating the GraphQL schema & decoding client queries.
+
+**Frontend**:
+* TypeScript: Programming Language.
+* React: GUI framework.
+* Vite: Build system.
+* Apollo Client: For sending queries.
+* GraphQL Code Generator: For generating code from server GraphQL schema.

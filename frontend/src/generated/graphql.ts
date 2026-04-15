@@ -14,6 +14,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** Date with time (isoformat) */
+  DateTime: { input: any; output: any; }
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf). */
   JSON: { input: any; output: any; }
   /** Represents NULL values */
@@ -34,22 +36,22 @@ export type ActivityModel = {
 };
 
 export type AllocationInput = {
-  endTime: Scalars['String']['input'];
+  endTime: Scalars['DateTime']['input'];
   eventKey: Scalars['Int']['input'];
   eventType: EventType;
   roomKey: Scalars['ID']['input'];
-  startTime: Scalars['String']['input'];
+  startTime: Scalars['DateTime']['input'];
 };
 
 export type AllocationModel = {
   __typename?: 'AllocationModel';
-  endTime: Scalars['String']['output'];
+  endTime: Scalars['DateTime']['output'];
   eventKey: Scalars['Int']['output'];
   eventType: EventType;
   key: Scalars['ID']['output'];
   room: RoomModel;
   roomKey: Scalars['ID']['output'];
-  startTime: Scalars['String']['output'];
+  startTime: Scalars['DateTime']['output'];
 };
 
 export type BuildingInput = {
@@ -549,7 +551,7 @@ export type ListCourseTeacherQuery = { __typename?: 'Query', listCourseTeacher: 
 export type ListAllocationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListAllocationQuery = { __typename?: 'Query', listAllocation: Array<{ __typename?: 'AllocationModel', key: string, eventType: EventType, eventKey: number, startTime: string, endTime: string, room: { __typename?: 'RoomModel', key: string, name: string, building: { __typename?: 'BuildingModel', key: string, name: string } } }> };
+export type ListAllocationQuery = { __typename?: 'Query', listAllocation: Array<{ __typename?: 'AllocationModel', key: string, eventType: EventType, eventKey: number, startTime: any, endTime: any, room: { __typename?: 'RoomModel', key: string, name: string, building: { __typename?: 'BuildingModel', key: string, name: string } } }> };
 
 
 export const ListCampusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListCampus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listCampus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}}]} as unknown as DocumentNode<ListCampusQuery, ListCampusQueryVariables>;
