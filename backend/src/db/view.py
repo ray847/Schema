@@ -28,14 +28,14 @@ class View:
             raise Exception("Append is only applicable to table views.")
         return self
 
-    def replace(self, key: shared.Key, replacements: dict) -> "View":
+    def replace(self, key: shared.Key | dict, replacements: dict) -> "View":
         if isinstance(self.view, TableView):
             self.view = ReplaceView(self.view, key, replacements)
         else:
             raise Exception("Replace is only applicable to table views.")
         return self
 
-    def pop(self, key: shared.Key) -> "View":
+    def pop(self, key: shared.Key | dict) -> "View":
         if isinstance(self.view, TableView):
             self.view = PopView(self.view, key)
         else:

@@ -8,7 +8,7 @@ from .sql_command import SQLCommand
 
 class ReplaceView:
     def __init__(
-        self, view: TableView, key: shared.Key, replacements: dict
+        self, view: TableView, key: shared.Key | dict, replacements: dict
     ) -> None:
         self.view = view
         self.key = key
@@ -33,10 +33,17 @@ class ReplaceView:
             else:
                 processed_values.append(value)
 
+        if isinstance(self.key, dict):
+            where_clause = " AND ".join([f"{k} = ?" for k in self.key.keys()])
+            where_values = tuple(self.key.values())
+        else:
+            where_clause = "key = ?"
+            where_values = (int(self.key),)
+
         update_command = SQLCommand(
             f"UPDATE {self.view.table.value.name} SET {
-                set_clause} WHERE key = ?",
-            tuple(processed_values) + (int(self.key),)
+                set_clause} WHERE {where_clause}",
+            tuple(processed_values) + where_values,
         )
 
         # Return UPDATE followed by SELECT from the table view

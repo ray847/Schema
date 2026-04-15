@@ -22,6 +22,7 @@ class TableRegistry(enum.Enum):
     COURSE_TEACHER = Table(
         primary_model=shared.model.CourseTeacherResponse,
         foreign_models=(shared.model.PersonResponse, shared.model.CourseResponse),
+        primary_keys=("person_key", "course_key"),
     )
     ALLOCATION = Table(
         primary_model=shared.model.AllocationResponse,

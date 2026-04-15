@@ -20,9 +20,11 @@ class Table:
         primary_model: Optional[Type[BaseModel]] = None,
         name: Optional[str] = None,
         foreign_models: Optional[tuple[Type[BaseModel], ...]] = None,
+        primary_keys: Optional[tuple[str, ...]] = None,
     ):
         self.primary_model = primary_model
         self.name = model_table_name(primary_model) if primary_model else name
+        self.primary_keys = primary_keys
 
         # Pydantic v2 compatibility
         if primary_model is not None:
@@ -47,8 +49,8 @@ class Table:
 
                 col = f"{field_name} {sql_type}"
 
-                # Detect Primary Key: If the field is named 'id'
-                if field_name == "key":
+                # Detect Primary Key: If the field is named 'key' AND we haven't specified primary_keys
+                if field_name == "key" and not self.primary_keys:
                     col += " PRIMARY KEY AUTOINCREMENT"
 
                 col_defs.append(col)
@@ -69,6 +71,9 @@ class Table:
                 f"FOREIGN KEY ({fk_col_name}) REFERENCES {
                     fk_table_name}(key) ON DELETE CASCADE"
             )
+
+        if self.primary_keys:
+            col_defs.append(f"PRIMARY KEY ({', '.join(self.primary_keys)})")
 
         sql = (
             f"CREATE TABLE IF NOT EXISTS {self.name} (\n  "

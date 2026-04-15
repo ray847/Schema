@@ -201,6 +201,42 @@ class Mutation:
         _ = await info.context.db_context.execute(view)
 
     @strawberry.field
+    async def update_course_teacher(
+        self,
+        person_key: strawberry.ID,
+        course_key: strawberry.ID,
+        replacements: JSON,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        model = db.TableRegistry.COURSE_TEACHER.value.primary_model
+        data = replacements if isinstance(replacements, dict) else {}
+        filtered = {
+            k: v for k, v in data.items() if k in getattr(model, "model_fields")
+        }
+        composite_key = {
+            "person_key": int(person_key),
+            "course_key": int(course_key),
+        }
+        view = db.View(db.TableRegistry.COURSE_TEACHER).replace(
+            composite_key, filtered
+        )
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def delete_course_teacher(
+        self,
+        person_key: strawberry.ID,
+        course_key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        composite_key = {
+            "person_key": int(person_key),
+            "course_key": int(course_key),
+        }
+        view = db.View(db.TableRegistry.COURSE_TEACHER).pop(composite_key)
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
     async def update_allocation(
         self,
         key: strawberry.ID,
