@@ -67,6 +67,7 @@ $
 - *后端中枢 (FastAPI)*：基于 Python 构筑高性能 API 接口，负责承载时空调度算法与并发请求 。
 - *持久化层 (SQLite)*：采用关系型数据库保证业务数据的强一致性 。通过引入 `rel_Enrollment` (选课) 与 `rel_Allocation` (排期) 等关联实体，完美拆解多对多关系，严格满足第三范式 (3NF)。
 - *交互界面 (ReAct)*：提供响应迅速的交互式数据可视化前端，支持多用户态切换与结果渲染 。
+- *智能动态数据库查询 (GraphQl)*：利用GraphQl接口为动态数据库查询提供极大的灵活性，同时也避免了直接传输SQL语句的安全漏洞。
 
 #figure(
   image("asset/entity_relation_diagram.svg"),

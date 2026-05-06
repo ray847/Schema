@@ -1,6 +1,6 @@
 # TODO
 
-* Add table editing.
+* ~~Add table editing.~~
 * Implement priviledges model.
   * User system
   * Admin edits

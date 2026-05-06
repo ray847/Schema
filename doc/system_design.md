@@ -43,4 +43,20 @@
 
 #### DB
 
-Functional Programming
+Functional Programming Wrappers
+
+The database module is organized as a small composable query layer over SQLite instead of exposing raw SQL construction to the GraphQL resolvers. A resolver starts from `db.View(TableRegistry.X)` and then chains wrapper operations such as `filter(...)`, `select(...)`, `append(...)`, `replace(...)`, and `pop(...)`. Each wrapper returns a new view-like object, so database behavior can be described as a pipeline:
+
+```text
+TableRegistry -> TableView -> FilterView/SelectView/AppendView/... -> SQLCommand -> DBContext.execute
+```
+
+This design keeps three responsibilities separate:
+
+* **Schema definition**: `TableRegistry` stores the canonical table metadata, including primary models, foreign-key models, primary keys, column attributes, and check constraints. `Table.get_create_sql()` derives the concrete `CREATE TABLE IF NOT EXISTS ...` statements from the Pydantic models.
+* **SQL generation**: view wrappers are responsible for translating high-level operations into parameterized `SQLCommand` objects. For example, `AppendView` produces `INSERT` statements, `ReplaceView` produces `UPDATE` statements, `PopView` produces `DELETE` statements, and `TableView` provides the base `SELECT * FROM table` command.
+* **Execution**: `DBContext.execute()` is the single async execution boundary. It opens a SQLite connection, enables foreign keys, executes the generated commands with bound parameters, commits the transaction, and returns the final result set to the GraphQL resolver.
+
+The wrapper model also improves safety and observability. Values are passed through SQLite parameter binding rather than string interpolation, reducing SQL injection risk for data values. The shared logging utility records generated SQL commands, executed SQL commands, arguments, commits, row counts, and SQLite errors. The log directory is configured by `LOG_DIR` in `.env`, with `logs/database.log` as the default target.
+
+For initialization, `db.setup()` asks `TableRegistry` to generate all schema statements and executes them before optional debug seed data is inserted. Cleanup is isolated in `db.clean()`, which removes the configured SQLite file and records the operation in the same log stream.
