@@ -2,6 +2,11 @@ import sqlite3
 from settings import settings
 from .view import View
 import asyncio
+from shared.log import log
+
+
+def sql_operation(sql: str) -> str:
+    return sql.strip().split(maxsplit=1)[0].upper() if sql.strip() else "SQL"
 
 
 class DBContext:
@@ -12,6 +17,7 @@ class DBContext:
         )
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON;")
+        log("PRAGMA", "Enabled sqlite foreign keys")
 
     def __del__(self):
         self.conn.close()
@@ -24,12 +30,32 @@ class DBContext:
             )
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON;")
+            log("PRAGMA", "Enabled sqlite foreign keys")
             result = None
             for command in view.sql:
-                result = conn.execute(
-                    command.format, command.arguments
-                ).fetchall()
+                operation = sql_operation(command.format)
+                log(
+                    operation,
+                    "Executing database command",
+                    sql=command.format,
+                    arguments=command.arguments,
+                )
+                try:
+                    result = conn.execute(
+                        command.format, command.arguments
+                    ).fetchall()
+                except sqlite3.Error as error:
+                    log(
+                        operation,
+                        "Database command failed",
+                        sql=command.format,
+                        arguments=command.arguments,
+                        error=str(error),
+                    )
+                    raise
+                log(operation, "Database command completed", rows=len(result))
             conn.commit()
+            log("COMMIT", "Committed database transaction")
             conn.close()
             return result
 

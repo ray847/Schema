@@ -3,6 +3,7 @@ from typing import Optional, Type, Any, get_origin, get_args, Union
 from pydantic import BaseModel
 import shared as shared
 from shared import key
+from shared.log import log
 
 
 def model_table_name(model: Type[BaseModel]) -> str:
@@ -88,6 +89,7 @@ class Table:
             + ",\n  ".join(col_defs + self.constraint)
             + "\n);"
         )
+        log("CREATE", "Generated SQL command", sql=sql, arguments=())
         return sql
 
     @staticmethod

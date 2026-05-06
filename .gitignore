@@ -1,6 +1,8 @@
 .vscode
 *.zip
 *.db
+*.log
+logs/
 
 .env
 __pycache__
