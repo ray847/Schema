@@ -39,8 +39,6 @@ def setup():
     context = DBContext()
     # Directly execute schema.
     for statement in sql_schema:
-        if settings.debug:
-            print(statement)
         execute_logged(context.conn, "CREATE", statement)
     if settings.debug:
         insert_mock_data(conn=context.conn)
@@ -99,7 +97,13 @@ VALUES (?, ?, ?, ?)""",
         """
 INSERT INTO Room (building_key, name, room_type, capacity, facility)
 VALUES (?, ?, ?, ?, ?)""",
-        (1, "101", "lecture", 50, Facility(power_outlet=10.0).model_dump_json()),
+        (
+            1,
+            "101",
+            "lecture",
+            50,
+            Facility(power_outlet=1.0).model_dump_json(),
+        ),
     )
     execute_logged(
         conn,
@@ -115,7 +119,13 @@ VALUES (?, ?, ?, ?)""",
         """
 INSERT INTO Room (building_key, name, room_type, capacity, facility)
 VALUES (?, ?, ?, ?, ?)""",
-        (2, "Reading Room", "lecture", 100, Facility(power_outlet=5.0).model_dump_json()),
+        (
+            2,
+            "Reading Room",
+            "lecture",
+            100,
+            Facility(power_outlet=0.5).model_dump_json(),
+        ),
     )
     execute_logged(
         conn,
@@ -193,13 +203,25 @@ VALUES (?, ?, ?, ?, ?)""",
         conn,
         "INSERT",
         "INSERT INTO Allocation (room_key, event_type, event_key, start_time, end_time) VALUES (?, ?, ?, ?, ?)",
-        (1, "Course", 1, datetime(2024, 4, 15, 9, 0, 0), datetime(2024, 4, 15, 10, 30, 0)),
+        (
+            1,
+            "Course",
+            1,
+            datetime(2024, 4, 15, 9, 0, 0),
+            datetime(2024, 4, 15, 10, 30, 0),
+        ),
     )
     execute_logged(
         conn,
         "INSERT",
         "INSERT INTO Allocation (room_key, event_type, event_key, start_time, end_time) VALUES (?, ?, ?, ?, ?)",
-        (2, "Activity", 1, datetime(2024, 4, 15, 14, 0, 0), datetime(2024, 4, 15, 16, 0, 0)),
+        (
+            2,
+            "Activity",
+            1,
+            datetime(2024, 4, 15, 14, 0, 0),
+            datetime(2024, 4, 15, 16, 0, 0),
+        ),
     )
 
     conn.commit()
