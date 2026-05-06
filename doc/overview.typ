@@ -1,11 +1,11 @@
-#import "TypstTemplate/template/formal.typ": formal
+#import "TypstTemplate/lib.typ": *
 
 #show: formal
 
 #set document(
   title: "Schema\n基于复旦万事通的智能行程规划与问答系统",
   author: "夏澄奕 24302010011",
-  date: datetime.today()
+  date: datetime.today(),
 )
 
 #title()
@@ -43,7 +43,7 @@ $
 $
 where
 $
-  "Distance: " cal(D) = sum_(i, j) ||r_(i,  j), r_(i, j + 1)||
+  "Distance: " cal(D) = sum_(i, j) ||r_(i, j), r_(i, j + 1)||
   \
   "Facility: " cal(F) = sum_(i, j) cal(F)(r_(i, j))t_(i, j)
   \
@@ -65,10 +65,10 @@ $
 本系统强依赖于底层数据库的严密性与规范化设计，技术栈采用轻量化与高性能结合的 Web 架构：
 
 - *后端中枢 (FastAPI)*：基于 Python 构筑高性能 API 接口，负责承载时空调度算法与并发请求 。
-- *持久化层 (SQLite/SQLAlchemy)*：采用关系型数据库保证业务数据的强一致性 。通过引入 `rel_Enrollment` (选课) 与 `rel_Allocation` (排期) 等关联实体，完美拆解多对多关系，严格满足第三范式 (3NF)。
-- *交互界面 (Streamlit)*：提供响应迅速的交互式数据可视化前端，支持多用户态切换与结果渲染 。
+- *持久化层 (SQLite)*：采用关系型数据库保证业务数据的强一致性 。通过引入 `rel_Enrollment` (选课) 与 `rel_Allocation` (排期) 等关联实体，完美拆解多对多关系，严格满足第三范式 (3NF)。
+- *交互界面 (ReAct)*：提供响应迅速的交互式数据可视化前端，支持多用户态切换与结果渲染 。
 
 #figure(
   image("asset/entity_relation_diagram.svg"),
-  caption: [Entity Relationship Diagram]
+  caption: [Entity Relationship Diagram],
 )<er_diagram>
