@@ -278,13 +278,7 @@ const LIST_PREFERENCE = gql`
 
 const CREATE_PREFERENCE = gql`
   mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {
-    createPreference(userKey: $userKey, input: $input) {
-      key
-      roomKey
-      buildingKey
-      campusKey
-      value
-    }
+    createPreference(userKey: $userKey, input: $input)
   }
 `;
 
@@ -296,13 +290,7 @@ const DELETE_PREFERENCE = gql`
 
 const UPDATE_PREFERENCE = gql`
   mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {
-    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input) {
-      key
-      roomKey
-      buildingKey
-      campusKey
-      value
-    }
+    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input)
   }
 `;
 
@@ -360,7 +348,7 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
 
   const [selectionConfig, setSelectionConfig] = useState<{
     isOpen: boolean; model: ModelType; title: string; onSelect: (item: any) => void;
-  }>({ isOpen: false, model: 'CAMPUS', title: '', onSelect: () => {}, });
+  }>({ isOpen: false, model: 'CAMPUS', title: '', onSelect: () => { }, });
 
   useEffect(() => { setCurrentInsertData({}); setEditingKey(undefined); }, [selectedModel]);
   useEffect(() => {
@@ -385,31 +373,31 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
   const [createCampus] = useMutation(CREATE_CAMPUS, { refetchQueries: [{ query: LIST_CAMPUS }] });
   const [deleteCampus] = useMutation(DELETE_CAMPUS, { refetchQueries: [{ query: LIST_CAMPUS }] });
   const [updateCampus] = useMutation(UPDATE_CAMPUS, { refetchQueries: [{ query: LIST_CAMPUS }] });
-  
+
   const [createBuilding] = useMutation(CREATE_BUILDING, { refetchQueries: [{ query: LIST_BUILDING }] });
   const [deleteBuilding] = useMutation(DELETE_BUILDING, { refetchQueries: [{ query: LIST_BUILDING }] });
   const [updateBuilding] = useMutation(UPDATE_BUILDING, { refetchQueries: [{ query: LIST_BUILDING }] });
-  
+
   const [createRoom] = useMutation(CREATE_ROOM, { refetchQueries: [{ query: LIST_ROOM }] });
   const [deleteRoom] = useMutation(DELETE_ROOM, { refetchQueries: [{ query: LIST_ROOM }] });
   const [updateRoom] = useMutation(UPDATE_ROOM, { refetchQueries: [{ query: LIST_ROOM }] });
-  
+
   const [createPerson] = useMutation(CREATE_PERSON, { refetchQueries: [{ query: LIST_PERSON }] });
   const [deletePerson] = useMutation(DELETE_PERSON, { refetchQueries: [{ query: LIST_PERSON }] });
   const [updatePerson] = useMutation(UPDATE_PERSON, { refetchQueries: [{ query: LIST_PERSON }] });
-  
+
   const [createCourse] = useMutation(CREATE_COURSE, { refetchQueries: [{ query: LIST_COURSE }] });
   const [deleteCourse] = useMutation(DELETE_COURSE, { refetchQueries: [{ query: LIST_COURSE }] });
   const [updateCourse] = useMutation(UPDATE_COURSE, { refetchQueries: [{ query: LIST_COURSE }] });
-  
+
   const [createActivity] = useMutation(CREATE_ACTIVITY, { refetchQueries: [{ query: LIST_ACTIVITY }] });
   const [deleteActivity] = useMutation(DELETE_ACTIVITY, { refetchQueries: [{ query: LIST_ACTIVITY }] });
   const [updateActivity] = useMutation(UPDATE_ACTIVITY, { refetchQueries: [{ query: LIST_ACTIVITY }] });
-  
+
   const [createCourseTeacher] = useMutation(CREATE_COURSE_TEACHER, { refetchQueries: [{ query: LIST_COURSE_TEACHER }] });
   const [deleteCourseTeacher] = useMutation(DELETE_COURSE_TEACHER, { refetchQueries: [{ query: LIST_COURSE_TEACHER }] });
   const [updateCourseTeacher] = useMutation(UPDATE_COURSE_TEACHER, { refetchQueries: [{ query: LIST_COURSE_TEACHER }] });
-  
+
   const [createAllocation] = useMutation(CREATE_ALLOCATION, { refetchQueries: [{ query: LIST_ALLOCATION }] });
   const [deleteAllocation] = useMutation(DELETE_ALLOCATION, { refetchQueries: [{ query: LIST_ALLOCATION }] });
   const [updateAllocation] = useMutation(UPDATE_ALLOCATION, { refetchQueries: [{ query: LIST_ALLOCATION }] });
@@ -540,7 +528,7 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
     const pendingInsert = pendingChanges[selectedModel];
     const pendingDelete = pendingDeletions[selectedModel];
     const pendingUpdate = pendingUpdates[selectedModel];
-    
+
     if (pendingInsert.length === 0 && pendingDelete.length === 0 && Object.keys(pendingUpdate).length === 0) return;
 
     // Handle Deletions
@@ -750,25 +738,25 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
   const renderContent = () => {
     const tableProps = canModifySelectedModel
       ? {
-          insertData: currentInsertData,
-          onInsertDataChange: setCurrentInsertData,
-          onInsert: handleConfirmInsert,
-          onDelete: handleConfirmDelete,
-          onUndoInsert: handleUndoInsert,
-          onUndoDelete: handleUndoDelete,
-          onUndoUpdate: handleUndoUpdate,
-          onEdit: (item: any) => setEditingKey(item.key),
-          onSaveEdit: handleSaveEdit,
-          onCancelEdit: () => setEditingKey(undefined),
-          editingKey,
-          pendingData: pendingChanges[selectedModel],
-          pendingDeleteKeys: pendingDeletions[selectedModel].map(p => p.key),
-          pendingUpdateKeys: Object.keys(pendingUpdates[selectedModel]),
-          striped: true,
-        }
+        insertData: currentInsertData,
+        onInsertDataChange: setCurrentInsertData,
+        onInsert: handleConfirmInsert,
+        onDelete: handleConfirmDelete,
+        onUndoInsert: handleUndoInsert,
+        onUndoDelete: handleUndoDelete,
+        onUndoUpdate: handleUndoUpdate,
+        onEdit: (item: any) => setEditingKey(item.key),
+        onSaveEdit: handleSaveEdit,
+        onCancelEdit: () => setEditingKey(undefined),
+        editingKey,
+        pendingData: pendingChanges[selectedModel],
+        pendingDeleteKeys: pendingDeletions[selectedModel].map(p => p.key),
+        pendingUpdateKeys: Object.keys(pendingUpdates[selectedModel]),
+        striped: true,
+      }
       : {
-          striped: true,
-        };
+        striped: true,
+      };
 
     if (selectedModel === 'PREFERENCE') {
       return renderPreferenceTable(tableProps);

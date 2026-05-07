@@ -39,9 +39,8 @@ async def list_preferences(
 
 
 async def create_preference(
-    user_key: int,
-    preference: PreferenceCreate,
-) -> PreferenceResponse:
+    user_key: int, preference: PreferenceCreate, db_context: db.DBContext
+) -> None:
     record = PreferenceBase(
         user_key=Key[Literal["User"]](user_key),
         room_key=preference.room_key,
@@ -52,29 +51,16 @@ async def create_preference(
     view = db.View(db.TableRegistry.PREFERENCE).append([record])
 
     try:
-        rows = await db.DBContext().execute(view)
+        _ = await db_context.execute(view)
     except sqlite3.IntegrityError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Preference target is invalid or already exists for this user",
         ) from error
 
-    preferences = [_preference_from_row(row) for row in rows]  # type: ignore
-    for existing in reversed(preferences):
-        if int(existing.user_key) == user_key and _same_target(
-            existing, preference
-        ):
-            return existing
-
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Created preference could not be loaded",
-    )
-
 
 async def delete_preference(
-    user_key: int,
-    preference_key: int,
+    user_key: int, preference_key: int, db_context: db.DBContext
 ) -> None:
     existing = await list_preferences(user_key)
     if not any(int(row.key) == preference_key for row in existing):
@@ -86,14 +72,15 @@ async def delete_preference(
     view = db.View(db.TableRegistry.PREFERENCE).pop(
         {"key": preference_key, "user_key": user_key}
     )
-    await db.DBContext().execute(view)
+    await db_context.execute(view)
 
 
 async def update_preference(
     user_key: int,
     preference_key: int,
     preference: PreferenceCreate,
-) -> PreferenceResponse:
+    db_context: db.DBContext,
+) -> None:
     existing = await list_preferences(user_key)
     if not any(int(row.key) == preference_key for row in existing):
         raise HTTPException(
@@ -115,19 +102,9 @@ async def update_preference(
     )
 
     try:
-        rows = await db.DBContext().execute(view)
+        _ = await db_context.execute(view)
     except sqlite3.IntegrityError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Preference target is invalid or already exists for this user",
         ) from error
-
-    preferences = [_preference_from_row(row) for row in rows]  # type: ignore
-    for updated in preferences:
-        if int(updated.key) == preference_key and int(updated.user_key) == user_key:
-            return updated
-
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Updated preference could not be loaded",
-    )

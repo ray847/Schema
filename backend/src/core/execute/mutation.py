@@ -9,7 +9,7 @@ from shared.model.course import CourseInput
 from shared.model.activity import ActivityInput
 from shared.model.course_teacher import CourseTeacherInput
 from shared.model.allocation import AllocationInput
-from shared.model.preference import PreferenceInput, PreferenceModel
+from shared.model.preference import PreferenceInput
 import db as db
 from core.access_control import require_admin
 from .context import ExecutionContext
@@ -27,17 +27,9 @@ class Mutation:
         user_key: strawberry.ID,
         input: PreferenceInput,
         info: strawberry.Info[ExecutionContext],
-    ) -> PreferenceModel:
-        preference = await preference_service.create_preference(
-            int(user_key),
-            input.to_pydantic(),
-        )
-        return PreferenceModel(
-            key=preference.key,
-            room_key=preference.room_key,
-            building_key=preference.building_key,
-            campus_key=preference.campus_key,
-            value=preference.value,
+    ) -> None:
+        _ = await preference_service.create_preference(
+            int(user_key), input.to_pydantic(), info.context.db_context
         )
 
     @strawberry.field
@@ -48,8 +40,7 @@ class Mutation:
         info: strawberry.Info[ExecutionContext],
     ) -> None:
         await preference_service.delete_preference(
-            int(user_key),
-            int(preference_key),
+            int(user_key), int(preference_key), info.context.db_context
         )
 
     @strawberry.field
@@ -59,18 +50,12 @@ class Mutation:
         preference_key: strawberry.ID,
         input: PreferenceInput,
         info: strawberry.Info[ExecutionContext],
-    ) -> PreferenceModel:
-        preference = await preference_service.update_preference(
+    ) -> None:
+        _ = await preference_service.update_preference(
             int(user_key),
             int(preference_key),
             input.to_pydantic(),
-        )
-        return PreferenceModel(
-            key=preference.key,
-            room_key=preference.room_key,
-            building_key=preference.building_key,
-            campus_key=preference.campus_key,
-            value=preference.value,
+            info.context.db_context,
         )
 
     @strawberry.field

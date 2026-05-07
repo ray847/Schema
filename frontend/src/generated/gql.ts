@@ -47,9 +47,9 @@ type Documents = {
     "\n  query ListCourseTeacher {\n    listCourseTeacher {\n      personKey\n      courseKey\n      responsibility\n      person {\n        key\n        name\n      }\n      course {\n        key\n        name\n      }\n    }\n  }\n": typeof types.ListCourseTeacherDocument,
     "\n  query ListAllocation {\n    listAllocation {\n      key\n      eventType\n      eventKey\n      startTime\n      endTime\n      room {\n        key\n        name\n        building {\n          key\n          name\n        }\n      }\n    }\n  }\n": typeof types.ListAllocationDocument,
     "\n  query ListPreference($userKey: ID!) {\n    listPreference(userKey: $userKey) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n": typeof types.ListPreferenceDocument,
-    "\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n": typeof types.CreatePreferenceDocument,
+    "\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input)\n  }\n": typeof types.CreatePreferenceDocument,
     "\n  mutation DeletePreference($userKey: ID!, $preferenceKey: ID!) {\n    deletePreference(userKey: $userKey, preferenceKey: $preferenceKey)\n  }\n": typeof types.DeletePreferenceDocument,
-    "\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n": typeof types.UpdatePreferenceDocument,
+    "\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input)\n  }\n": typeof types.UpdatePreferenceDocument,
 };
 const documents: Documents = {
     "\n  query ListCampus {\n    listCampus {\n      key\n      name\n      address\n    }\n  }\n": types.ListCampusDocument,
@@ -85,9 +85,9 @@ const documents: Documents = {
     "\n  query ListCourseTeacher {\n    listCourseTeacher {\n      personKey\n      courseKey\n      responsibility\n      person {\n        key\n        name\n      }\n      course {\n        key\n        name\n      }\n    }\n  }\n": types.ListCourseTeacherDocument,
     "\n  query ListAllocation {\n    listAllocation {\n      key\n      eventType\n      eventKey\n      startTime\n      endTime\n      room {\n        key\n        name\n        building {\n          key\n          name\n        }\n      }\n    }\n  }\n": types.ListAllocationDocument,
     "\n  query ListPreference($userKey: ID!) {\n    listPreference(userKey: $userKey) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n": types.ListPreferenceDocument,
-    "\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n": types.CreatePreferenceDocument,
+    "\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input)\n  }\n": types.CreatePreferenceDocument,
     "\n  mutation DeletePreference($userKey: ID!, $preferenceKey: ID!) {\n    deletePreference(userKey: $userKey, preferenceKey: $preferenceKey)\n  }\n": types.DeletePreferenceDocument,
-    "\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n": types.UpdatePreferenceDocument,
+    "\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input)\n  }\n": types.UpdatePreferenceDocument,
 };
 
 /**
@@ -239,7 +239,7 @@ export function graphql(source: "\n  query ListPreference($userKey: ID!) {\n    
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n"];
+export function graphql(source: "\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input)\n  }\n"): (typeof documents)["\n  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {\n    createPreference(userKey: $userKey, input: $input)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -247,7 +247,7 @@ export function graphql(source: "\n  mutation DeletePreference($userKey: ID!, $p
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n"): (typeof documents)["\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input) {\n      key\n      roomKey\n      buildingKey\n      campusKey\n      value\n    }\n  }\n"];
+export function graphql(source: "\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input)\n  }\n"): (typeof documents)["\n  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {\n    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input)\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
