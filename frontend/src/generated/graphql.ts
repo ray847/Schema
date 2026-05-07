@@ -133,6 +133,7 @@ export type Mutation = {
   createCourse?: Maybe<Scalars['Void']['output']>;
   createCourseTeacher?: Maybe<Scalars['Void']['output']>;
   createPerson?: Maybe<Scalars['Void']['output']>;
+  createPreference: PreferenceModel;
   createRoom?: Maybe<Scalars['Void']['output']>;
   deleteActivity?: Maybe<Scalars['Void']['output']>;
   deleteAllocation?: Maybe<Scalars['Void']['output']>;
@@ -141,6 +142,7 @@ export type Mutation = {
   deleteCourse?: Maybe<Scalars['Void']['output']>;
   deleteCourseTeacher?: Maybe<Scalars['Void']['output']>;
   deletePerson?: Maybe<Scalars['Void']['output']>;
+  deletePreference?: Maybe<Scalars['Void']['output']>;
   deleteRoom?: Maybe<Scalars['Void']['output']>;
   updateActivity?: Maybe<Scalars['Void']['output']>;
   updateAllocation?: Maybe<Scalars['Void']['output']>;
@@ -149,6 +151,7 @@ export type Mutation = {
   updateCourse?: Maybe<Scalars['Void']['output']>;
   updateCourseTeacher?: Maybe<Scalars['Void']['output']>;
   updatePerson?: Maybe<Scalars['Void']['output']>;
+  updatePreference: PreferenceModel;
   updateRoom?: Maybe<Scalars['Void']['output']>;
 };
 
@@ -185,6 +188,12 @@ export type MutationCreateCourseTeacherArgs = {
 
 export type MutationCreatePersonArgs = {
   inputs: Array<PersonInput>;
+};
+
+
+export type MutationCreatePreferenceArgs = {
+  input: PreferenceInput;
+  userKey: Scalars['ID']['input'];
 };
 
 
@@ -226,6 +235,12 @@ export type MutationDeleteCourseTeacherArgs = {
 
 export type MutationDeletePersonArgs = {
   key: Scalars['ID']['input'];
+};
+
+
+export type MutationDeletePreferenceArgs = {
+  preferenceKey: Scalars['ID']['input'];
+  userKey: Scalars['ID']['input'];
 };
 
 
@@ -277,6 +292,13 @@ export type MutationUpdatePersonArgs = {
 };
 
 
+export type MutationUpdatePreferenceArgs = {
+  input: PreferenceInput;
+  preferenceKey: Scalars['ID']['input'];
+  userKey: Scalars['ID']['input'];
+};
+
+
 export type MutationUpdateRoomArgs = {
   key: Scalars['ID']['input'];
   replacements: Scalars['JSON']['input'];
@@ -296,6 +318,22 @@ export type PersonModel = {
   role: Scalars['String']['output'];
 };
 
+export type PreferenceInput = {
+  buildingKey?: InputMaybe<Scalars['ID']['input']>;
+  campusKey?: InputMaybe<Scalars['ID']['input']>;
+  roomKey?: InputMaybe<Scalars['ID']['input']>;
+  value: Scalars['Float']['input'];
+};
+
+export type PreferenceModel = {
+  __typename?: 'PreferenceModel';
+  buildingKey?: Maybe<Scalars['ID']['output']>;
+  campusKey?: Maybe<Scalars['ID']['output']>;
+  key: Scalars['ID']['output'];
+  roomKey?: Maybe<Scalars['ID']['output']>;
+  value: Scalars['Float']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   listActivity: Array<ActivityModel>;
@@ -305,7 +343,13 @@ export type Query = {
   listCourse: Array<CourseModel>;
   listCourseTeacher: Array<CourseTeacherModel>;
   listPerson: Array<PersonModel>;
+  listPreference: Array<PreferenceModel>;
   listRoom: Array<RoomModel>;
+};
+
+
+export type QueryListPreferenceArgs = {
+  userKey: Scalars['ID']['input'];
 };
 
 export type RoomInput = {
@@ -553,6 +597,38 @@ export type ListAllocationQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ListAllocationQuery = { __typename?: 'Query', listAllocation: Array<{ __typename?: 'AllocationModel', key: string, eventType: EventType, eventKey: number, startTime: any, endTime: any, room: { __typename?: 'RoomModel', key: string, name: string, building: { __typename?: 'BuildingModel', key: string, name: string } } }> };
 
+export type ListPreferenceQueryVariables = Exact<{
+  userKey: Scalars['ID']['input'];
+}>;
+
+
+export type ListPreferenceQuery = { __typename?: 'Query', listPreference: Array<{ __typename?: 'PreferenceModel', key: string, roomKey?: string | null, buildingKey?: string | null, campusKey?: string | null, value: number }> };
+
+export type CreatePreferenceMutationVariables = Exact<{
+  userKey: Scalars['ID']['input'];
+  input: PreferenceInput;
+}>;
+
+
+export type CreatePreferenceMutation = { __typename?: 'Mutation', createPreference: { __typename?: 'PreferenceModel', key: string, roomKey?: string | null, buildingKey?: string | null, campusKey?: string | null, value: number } };
+
+export type DeletePreferenceMutationVariables = Exact<{
+  userKey: Scalars['ID']['input'];
+  preferenceKey: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePreferenceMutation = { __typename?: 'Mutation', deletePreference?: any | null };
+
+export type UpdatePreferenceMutationVariables = Exact<{
+  userKey: Scalars['ID']['input'];
+  preferenceKey: Scalars['ID']['input'];
+  input: PreferenceInput;
+}>;
+
+
+export type UpdatePreferenceMutation = { __typename?: 'Mutation', updatePreference: { __typename?: 'PreferenceModel', key: string, roomKey?: string | null, buildingKey?: string | null, campusKey?: string | null, value: number } };
+
 
 export const ListCampusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListCampus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listCampus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}}]} as unknown as DocumentNode<ListCampusQuery, ListCampusQueryVariables>;
 export const CreateCampusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCampus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"inputs"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CampusInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCampus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"inputs"},"value":{"kind":"Variable","name":{"kind":"Name","value":"inputs"}}}]}]}}]} as unknown as DocumentNode<CreateCampusMutation, CreateCampusMutationVariables>;
@@ -586,3 +662,7 @@ export const UpdateAllocationDocument = {"kind":"Document","definitions":[{"kind
 export const ListActivityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListActivity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listActivity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"person"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<ListActivityQuery, ListActivityQueryVariables>;
 export const ListCourseTeacherDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListCourseTeacher"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listCourseTeacher"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"personKey"}},{"kind":"Field","name":{"kind":"Name","value":"courseKey"}},{"kind":"Field","name":{"kind":"Name","value":"responsibility"}},{"kind":"Field","name":{"kind":"Name","value":"person"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"course"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<ListCourseTeacherQuery, ListCourseTeacherQueryVariables>;
 export const ListAllocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListAllocation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listAllocation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"eventType"}},{"kind":"Field","name":{"kind":"Name","value":"eventKey"}},{"kind":"Field","name":{"kind":"Name","value":"startTime"}},{"kind":"Field","name":{"kind":"Name","value":"endTime"}},{"kind":"Field","name":{"kind":"Name","value":"room"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"building"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ListAllocationQuery, ListAllocationQueryVariables>;
+export const ListPreferenceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListPreference"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listPreference"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"roomKey"}},{"kind":"Field","name":{"kind":"Name","value":"buildingKey"}},{"kind":"Field","name":{"kind":"Name","value":"campusKey"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<ListPreferenceQuery, ListPreferenceQueryVariables>;
+export const CreatePreferenceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePreference"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PreferenceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPreference"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"roomKey"}},{"kind":"Field","name":{"kind":"Name","value":"buildingKey"}},{"kind":"Field","name":{"kind":"Name","value":"campusKey"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<CreatePreferenceMutation, CreatePreferenceMutationVariables>;
+export const DeletePreferenceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePreference"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"preferenceKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePreference"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}}},{"kind":"Argument","name":{"kind":"Name","value":"preferenceKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"preferenceKey"}}}]}]}}]} as unknown as DocumentNode<DeletePreferenceMutation, DeletePreferenceMutationVariables>;
+export const UpdatePreferenceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePreference"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"preferenceKey"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PreferenceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePreference"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userKey"}}},{"kind":"Argument","name":{"kind":"Name","value":"preferenceKey"},"value":{"kind":"Variable","name":{"kind":"Name","value":"preferenceKey"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"roomKey"}},{"kind":"Field","name":{"kind":"Name","value":"buildingKey"}},{"kind":"Field","name":{"kind":"Name","value":"campusKey"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<UpdatePreferenceMutation, UpdatePreferenceMutationVariables>;

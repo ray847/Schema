@@ -24,6 +24,13 @@ from .allocation import (
 )
 from .facility import Facility
 from .user import UserCreate, UserResponse, UserPublic, UserModel, UserType
+from .preference import (
+    PreferenceBase,
+    PreferenceCreate,
+    PreferenceResponse,
+    PreferenceModel,
+    PreferenceInput,
+)
 
 __all__ = [
     "CampusCreate",
@@ -65,4 +72,9 @@ __all__ = [
     "UserPublic",
     "UserModel",
     "UserType",
+    "PreferenceBase",
+    "PreferenceCreate",
+    "PreferenceResponse",
+    "PreferenceModel",
+    "PreferenceInput",
 ]

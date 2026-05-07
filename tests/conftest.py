@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -7,15 +8,18 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 
+from tests.helpers import PASSWORD
+
 
 ROOT = Path(__file__).resolve().parents[1]
 BACKEND_SRC = ROOT / "backend" / "src"
-DB_FILE = BACKEND_SRC / "db_file.db"
+HTTP_TIMEOUT_SECONDS = 45
 
 
 def _free_port() -> int:
@@ -39,7 +43,7 @@ def _request(
         method=method,
     )
     try:
-        with urllib.request.urlopen(request, timeout=10) as response:
+        with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
             payload = response.read()
             return response.status, json.loads(payload or b"{}")
     except urllib.error.HTTPError as error:
@@ -51,14 +55,18 @@ def _request(
         return error.code, parsed
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def backend_url() -> Iterator[str]:
-    if DB_FILE.exists():
-        DB_FILE.unlink()
-
+    test_dir = ROOT / ".test_tmp" / f"backend-{uuid.uuid4().hex}"
+    test_dir.mkdir(parents=True)
+    db_file = test_dir / "db_file.db"
+    log_dir = test_dir / "log"
     port = _free_port()
     env = os.environ.copy()
     env["PYTHONPATH"] = str(BACKEND_SRC)
+    env["DEBUG"] = "false"
+    env["DB_FILEPATH"] = str(db_file)
+    env["LOG_DIR"] = str(log_dir)
     process = subprocess.Popen(
         [
             sys.executable,
@@ -103,11 +111,35 @@ def backend_url() -> Iterator[str]:
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=10)
+        shutil.rmtree(test_dir, ignore_errors=True)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def api(backend_url: str):
     return ApiClient(backend_url)
+
+
+@pytest.fixture(scope="module")
+def users(api):
+    admin = api.register("admin@example.test", PASSWORD)
+    assert admin["type"] == "admin"
+    assert admin["person_key"] is None
+
+    admin_token = api.token("admin@example.test", PASSWORD)
+    admin_me = api.me(admin_token)
+    assert admin_me["email"] == "admin@example.test"
+    assert admin_me["type"] == "admin"
+
+    standard = api.register("standard@example.test", PASSWORD)
+    assert standard["type"] == "standard"
+    standard_token = api.token("standard@example.test", PASSWORD)
+
+    return {
+        "admin": admin,
+        "admin_token": admin_token,
+        "standard": standard,
+        "standard_token": standard_token,
+    }
 
 
 class ApiClient:

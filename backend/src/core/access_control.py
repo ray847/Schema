@@ -5,7 +5,7 @@ from shared.model import UserPublic, UserType
 
 
 def is_private_table(table: db.TableRegistry) -> bool:
-    return table is db.TableRegistry.USER
+    return table in {db.TableRegistry.USER, db.TableRegistry.PREFERENCE}
 
 
 def require_authenticated_user(

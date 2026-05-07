@@ -8,8 +8,10 @@ from shared.model.course import CourseModel
 from shared.model.activity import ActivityModel
 from shared.model.course_teacher import CourseTeacherModel
 from shared.model.allocation import AllocationModel
+from shared.model.preference import PreferenceModel
 import db
 from .context import ExecutionContext
+from . import preference as preference_service
 
 
 @strawberry.type
@@ -135,4 +137,22 @@ class Query:
                 end_time=row["end_time"],
             )
             for row in res  # type: ignore
+        ]
+
+    @strawberry.field
+    async def list_preference(
+        self,
+        user_key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> list[PreferenceModel]:
+        res = await preference_service.list_preferences(int(user_key))
+        return [
+            PreferenceModel(
+                key=preference.key,
+                room_key=preference.room_key,
+                building_key=preference.building_key,
+                campus_key=preference.campus_key,
+                value=preference.value,
+            )
+            for preference in res
         ]

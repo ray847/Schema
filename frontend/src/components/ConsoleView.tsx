@@ -1,6 +1,8 @@
+import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useState, useEffect } from 'react';
 import { graphql } from '../generated/gql';
+import type { CurrentUser } from '../auth';
 import { Table } from './Table';
 import { Selector } from './Selector';
 import { Popout } from './Popout';
@@ -262,46 +264,123 @@ const LIST_ALLOCATION = graphql(`
   }
 `);
 
-type ModelType = 'CAMPUS' | 'BUILDING' | 'ROOM' | 'PERSON' | 'COURSE' | 'ACTIVITY' | 'COURSE_TEACHER' | 'ALLOCATION';
+const LIST_PREFERENCE = gql`
+  query ListPreference($userKey: ID!) {
+    listPreference(userKey: $userKey) {
+      key
+      roomKey
+      buildingKey
+      campusKey
+      value
+    }
+  }
+`;
+
+const CREATE_PREFERENCE = gql`
+  mutation CreatePreference($userKey: ID!, $input: PreferenceInput!) {
+    createPreference(userKey: $userKey, input: $input) {
+      key
+      roomKey
+      buildingKey
+      campusKey
+      value
+    }
+  }
+`;
+
+const DELETE_PREFERENCE = gql`
+  mutation DeletePreference($userKey: ID!, $preferenceKey: ID!) {
+    deletePreference(userKey: $userKey, preferenceKey: $preferenceKey)
+  }
+`;
+
+const UPDATE_PREFERENCE = gql`
+  mutation UpdatePreference($userKey: ID!, $preferenceKey: ID!, $input: PreferenceInput!) {
+    updatePreference(userKey: $userKey, preferenceKey: $preferenceKey, input: $input) {
+      key
+      roomKey
+      buildingKey
+      campusKey
+      value
+    }
+  }
+`;
+
+type ModelType = 'CAMPUS' | 'BUILDING' | 'ROOM' | 'PERSON' | 'COURSE' | 'ACTIVITY' | 'COURSE_TEACHER' | 'ALLOCATION' | 'PREFERENCE';
+type PreferenceTargetType = 'CAMPUS' | 'BUILDING' | 'ROOM';
+
+interface PreferenceRow {
+  key: string;
+  roomKey: string | null;
+  buildingKey: string | null;
+  campusKey: string | null;
+  value: number;
+  targetType?: PreferenceTargetType;
+  targetKey?: string | null;
+  target?: any;
+}
+
+interface ListPreferenceData {
+  listPreference: PreferenceRow[];
+}
+
+interface ListPreferenceVars {
+  userKey: string;
+}
 
 interface ConsoleViewProps {
   editable?: boolean;
+  currentUser?: CurrentUser | null;
 }
 
-export function ConsoleView({ editable = false }: ConsoleViewProps) {
+export function ConsoleView({ editable = false, currentUser = null }: ConsoleViewProps) {
   const [selectedModel, setSelectedModel] = useState<ModelType>('CAMPUS');
   const [currentInsertData, setCurrentInsertData] = useState<Record<string, any>>({});
   const [editingKey, setEditingKey] = useState<string | undefined>(undefined);
   const [pendingChanges, setPendingChanges] = useState<Record<string, any[]>>({
-    CAMPUS: [], BUILDING: [], ROOM: [], PERSON: [], COURSE: [], ACTIVITY: [], COURSE_TEACHER: [], ALLOCATION: [],
+    CAMPUS: [], BUILDING: [], ROOM: [], PERSON: [], COURSE: [], ACTIVITY: [], COURSE_TEACHER: [], ALLOCATION: [], PREFERENCE: [],
   });
   const [pendingDeletions, setPendingDeletions] = useState<Record<string, any[]>>({
-    CAMPUS: [], BUILDING: [], ROOM: [], PERSON: [], COURSE: [], ACTIVITY: [], COURSE_TEACHER: [], ALLOCATION: [],
+    CAMPUS: [], BUILDING: [], ROOM: [], PERSON: [], COURSE: [], ACTIVITY: [], COURSE_TEACHER: [], ALLOCATION: [], PREFERENCE: [],
   });
   const [pendingUpdates, setPendingUpdates] = useState<Record<string, Record<string, any>>>({
-    CAMPUS: {}, BUILDING: {}, ROOM: {}, PERSON: {}, COURSE: {}, ACTIVITY: {}, COURSE_TEACHER: {}, ALLOCATION: {},
+    CAMPUS: {}, BUILDING: {}, ROOM: {}, PERSON: {}, COURSE: {}, ACTIVITY: {}, COURSE_TEACHER: {}, ALLOCATION: {}, PREFERENCE: {},
   });
 
-  const options: { value: ModelType; label: string }[] = [
+  const baseOptions: { value: ModelType; label: string }[] = [
     { value: 'CAMPUS', label: 'Campuses' }, { value: 'BUILDING', label: 'Buildings' }, { value: 'ROOM', label: 'Rooms' },
     { value: 'PERSON', label: 'People' }, { value: 'COURSE', label: 'Courses' }, { value: 'ACTIVITY', label: 'Activities' },
     { value: 'COURSE_TEACHER', label: 'Course Teachers' }, { value: 'ALLOCATION', label: 'Allocations' },
   ];
+  const options = currentUser
+    ? [...baseOptions, { value: 'PREFERENCE' as const, label: 'Preferences' }]
+    : baseOptions;
+  const canModifySelectedModel = editable || (selectedModel === 'PREFERENCE' && !!currentUser);
+  const preferenceUserKey = currentUser ? String(currentUser.key) : '';
 
   const [selectionConfig, setSelectionConfig] = useState<{
     isOpen: boolean; model: ModelType; title: string; onSelect: (item: any) => void;
   }>({ isOpen: false, model: 'CAMPUS', title: '', onSelect: () => {}, });
 
   useEffect(() => { setCurrentInsertData({}); setEditingKey(undefined); }, [selectedModel]);
+  useEffect(() => {
+    if (!currentUser && selectedModel === 'PREFERENCE') {
+      setSelectedModel('CAMPUS');
+    }
+  }, [currentUser, selectedModel]);
 
-  const campusQuery = useQuery(LIST_CAMPUS, { skip: selectedModel !== 'CAMPUS' && selectionConfig.model !== 'CAMPUS' });
-  const buildingQuery = useQuery(LIST_BUILDING, { skip: selectedModel !== 'BUILDING' && selectionConfig.model !== 'BUILDING' });
-  const roomQuery = useQuery(LIST_ROOM, { skip: selectedModel !== 'ROOM' && selectionConfig.model !== 'ROOM' });
+  const campusQuery = useQuery(LIST_CAMPUS, { skip: selectedModel !== 'CAMPUS' && selectionConfig.model !== 'CAMPUS' && selectedModel !== 'PREFERENCE' });
+  const buildingQuery = useQuery(LIST_BUILDING, { skip: selectedModel !== 'BUILDING' && selectionConfig.model !== 'BUILDING' && selectedModel !== 'PREFERENCE' });
+  const roomQuery = useQuery(LIST_ROOM, { skip: selectedModel !== 'ROOM' && selectionConfig.model !== 'ROOM' && selectedModel !== 'PREFERENCE' });
   const personQuery = useQuery(LIST_PERSON, { skip: selectedModel !== 'PERSON' && selectionConfig.model !== 'PERSON' });
   const courseQuery = useQuery(LIST_COURSE, { skip: selectedModel !== 'COURSE' && selectionConfig.model !== 'COURSE' && selectedModel !== 'ALLOCATION' });
   const activityQuery = useQuery(LIST_ACTIVITY, { skip: selectedModel !== 'ACTIVITY' && selectionConfig.model !== 'ACTIVITY' && selectedModel !== 'ALLOCATION' });
   const courseTeacherQuery = useQuery(LIST_COURSE_TEACHER, { skip: selectedModel !== 'COURSE_TEACHER' });
   const allocationQuery = useQuery(LIST_ALLOCATION, { skip: selectedModel !== 'ALLOCATION' });
+  const preferenceQuery = useQuery<ListPreferenceData, ListPreferenceVars>(LIST_PREFERENCE, {
+    variables: { userKey: preferenceUserKey },
+    skip: selectedModel !== 'PREFERENCE' || !currentUser,
+  });
 
   const [createCampus] = useMutation(CREATE_CAMPUS, { refetchQueries: [{ query: LIST_CAMPUS }] });
   const [deleteCampus] = useMutation(DELETE_CAMPUS, { refetchQueries: [{ query: LIST_CAMPUS }] });
@@ -334,6 +413,9 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
   const [createAllocation] = useMutation(CREATE_ALLOCATION, { refetchQueries: [{ query: LIST_ALLOCATION }] });
   const [deleteAllocation] = useMutation(DELETE_ALLOCATION, { refetchQueries: [{ query: LIST_ALLOCATION }] });
   const [updateAllocation] = useMutation(UPDATE_ALLOCATION, { refetchQueries: [{ query: LIST_ALLOCATION }] });
+  const [createPreference] = useMutation(CREATE_PREFERENCE);
+  const [deletePreference] = useMutation(DELETE_PREFERENCE);
+  const [updatePreference] = useMutation(UPDATE_PREFERENCE);
 
   const safeJsonParse = (str: string) => { try { return JSON.parse(str || '{}'); } catch (e) { return {}; } };
   const formatDateTime = (dt: any) => {
@@ -373,6 +455,62 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
     return date.toISOString();
   };
 
+  const findByKey = (items: any[] | undefined, key: any) =>
+    items?.find(item => String(item.key) === String(key));
+
+  const getPreferenceTargetType = (preference: Record<string, any>): PreferenceTargetType | undefined => {
+    if (preference.target?.targetType) return preference.target.targetType;
+    if (preference.targetType) return preference.targetType;
+    if (preference.roomKey) return 'ROOM';
+    if (preference.buildingKey) return 'BUILDING';
+    if (preference.campusKey) return 'CAMPUS';
+    return undefined;
+  };
+
+  const getPreferenceTargetKey = (preference: Record<string, any>, targetType?: PreferenceTargetType) => {
+    if (preference.target?.targetType === targetType) return preference.target.key;
+    if (preference.targetKey) return preference.targetKey;
+    if (targetType === 'ROOM') return preference.roomKey;
+    if (targetType === 'BUILDING') return preference.buildingKey;
+    if (targetType === 'CAMPUS') return preference.campusKey;
+    return undefined;
+  };
+
+  const getPreferenceTarget = (targetType: PreferenceTargetType | undefined, targetKey: any) => {
+    if (targetType === 'ROOM') return findByKey(roomQuery.data?.listRoom, targetKey);
+    if (targetType === 'BUILDING') return findByKey(buildingQuery.data?.listBuilding, targetKey);
+    if (targetType === 'CAMPUS') return findByKey(campusQuery.data?.listCampus, targetKey);
+    return undefined;
+  };
+
+  const preferenceRows = preferenceQuery.data?.listPreference.map(preference => {
+    const targetType = getPreferenceTargetType(preference);
+    const targetKey = getPreferenceTargetKey(preference, targetType);
+    const target = getPreferenceTarget(targetType, targetKey);
+    return {
+      ...preference,
+      targetType,
+      targetKey,
+      target: target ? { ...target, targetType } : undefined,
+    };
+  });
+
+  const buildPreferenceInput = (item: Record<string, any>) => {
+    const targetType = getPreferenceTargetType(item);
+    const targetKey = getPreferenceTargetKey(item, targetType);
+    const parsedValue = Number.parseFloat(String(item.value ?? 0));
+    const input: Record<string, any> = {
+      value: Number.isFinite(parsedValue)
+        ? Math.max(-1, Math.min(1, parsedValue))
+        : 0,
+    };
+
+    if (targetType === 'ROOM') input.roomKey = String(targetKey ?? '');
+    if (targetType === 'BUILDING') input.buildingKey = String(targetKey ?? '');
+    if (targetType === 'CAMPUS') input.campusKey = String(targetKey ?? '');
+    return input;
+  };
+
   const handleConfirmInsert = (item: Record<string, any>) => {
     const newItem = { ...item, key: `pending-${Date.now()}-${pendingChanges[selectedModel].length}` };
     setPendingChanges(prev => ({ ...prev, [selectedModel]: [...prev[selectedModel], newItem] }));
@@ -408,7 +546,9 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
     // Handle Deletions
     if (pendingDelete.length > 0) {
       for (const item of pendingDelete) {
-        if (selectedModel === 'COURSE_TEACHER') { await deleteCourseTeacher({ variables: { courseKey: item.courseKey, personKey: item.personKey } }); } 
+        if (selectedModel === 'PREFERENCE' && currentUser) {
+          await deletePreference({ variables: { userKey: preferenceUserKey, preferenceKey: item.key } });
+        } else if (selectedModel === 'COURSE_TEACHER') { await deleteCourseTeacher({ variables: { courseKey: item.courseKey, personKey: item.personKey } }); }
         else {
           const vars = { variables: { key: item.key } };
           switch (selectedModel) {
@@ -426,6 +566,17 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
 
     // Handle Updates
     for (const [key, replacements] of Object.entries(pendingUpdate)) {
+      if (selectedModel === 'PREFERENCE' && currentUser) {
+        await updatePreference({
+          variables: {
+            userKey: preferenceUserKey,
+            preferenceKey: key,
+            input: buildPreferenceInput(replacements),
+          },
+        });
+        continue;
+      }
+
       const formatted = { ...replacements };
       const originalCourseKey = formatted.courseKey?.key || formatted.courseKey;
       const originalPersonKey = formatted.personKey?.key || formatted.personKey;
@@ -469,7 +620,23 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
         case 'ACTIVITY': await createActivity({ variables: { inputs: pendingInsert.map(p => ({ name: p.name, personKey: p.personKey?.key })) } }); break;
         case 'COURSE_TEACHER': await createCourseTeacher({ variables: { inputs: pendingInsert.map(p => ({ personKey: p.personKey?.key, courseKey: p.courseKey?.key, responsibility: p.responsibility })) } }); break;
         case 'ALLOCATION': await createAllocation({ variables: { inputs: pendingInsert.map(p => ({ eventType: p.eventType, eventKey: parseInt(p.eventKey?.key) || 0, startTime: parseDateTimeInput(String(p.startTime || '')), endTime: parseDateTimeInput(String(p.endTime || '')), roomKey: p.roomKey?.key })) } }); break;
+        case 'PREFERENCE':
+          if (currentUser) {
+            for (const preference of pendingInsert) {
+              await createPreference({
+                variables: {
+                  userKey: preferenceUserKey,
+                  input: buildPreferenceInput(preference),
+                },
+              });
+            }
+          }
+          break;
       }
+    }
+
+    if (selectedModel === 'PREFERENCE' && currentUser) {
+      await preferenceQuery.refetch({ userKey: preferenceUserKey });
     }
 
     setPendingChanges(prev => ({ ...prev, [selectedModel]: [] }));
@@ -489,8 +656,99 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
     }
   };
 
+  const renderPreferenceTargetType = (targetType?: PreferenceTargetType) => {
+    if (targetType === 'ROOM') return 'Room';
+    if (targetType === 'BUILDING') return 'Building';
+    if (targetType === 'CAMPUS') return 'Campus';
+    return '';
+  };
+
+  const renderPreferenceTarget = (preference: Record<string, any>) => {
+    const targetType = getPreferenceTargetType(preference);
+    const targetKey = getPreferenceTargetKey(preference, targetType);
+    const target = preference.target || getPreferenceTarget(targetType, targetKey);
+    if (target?.name) return <span className="font-semibold">{target.name}</span>;
+    if (targetKey) return <span className="font-mono text-gray-500">#{targetKey}</span>;
+    return <span className="text-gray-400">No target</span>;
+  };
+
+  const renderPreferenceTable = (tableProps: Record<string, any>) => (
+    <Table
+      {...tableProps}
+      data={preferenceRows}
+      loading={preferenceQuery.loading}
+      error={preferenceQuery.error}
+      columns={[
+        { header: 'Key', render: (p) => <span className="text-xs font-mono text-gray-500">{p.key}</span> },
+        {
+          header: 'Target Type',
+          inputKey: 'target',
+          renderInput: (val, onChange) => (
+            <select
+              className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              value={val?.targetType || ''}
+              onChange={(e) => onChange({ targetType: e.target.value })}
+            >
+              <option value="">Select Target</option>
+              <option value="CAMPUS">Campus</option>
+              <option value="BUILDING">Building</option>
+              <option value="ROOM">Room</option>
+            </select>
+          ),
+          render: (p) => <span>{renderPreferenceTargetType(getPreferenceTargetType(p))}</span>,
+        },
+        {
+          header: 'Target',
+          inputKey: 'target',
+          renderInput: (val, onChange) => {
+            const targetType = val?.targetType as PreferenceTargetType | undefined;
+            const selectedTarget = val?.key && val?.targetType === targetType
+              ? (getPreferenceTarget(targetType, val.key) || val)
+              : undefined;
+            return (
+              <button
+                disabled={!targetType}
+                onClick={() => targetType && setSelectionConfig({
+                  isOpen: true,
+                  model: targetType,
+                  title: `Select ${renderPreferenceTargetType(targetType)}`,
+                  onSelect: (item) => onChange({ ...item, targetType }),
+                })}
+                className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 disabled:bg-gray-50 transition-colors flex justify-between items-center"
+              >
+                <span className={selectedTarget?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>
+                  {selectedTarget?.name || (targetType ? `Pick ${renderPreferenceTargetType(targetType)}...` : 'Pick type first')}
+                </span>
+                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            );
+          },
+          render: renderPreferenceTarget,
+        },
+        {
+          header: 'Value',
+          inputKey: 'value',
+          renderInput: (val, onChange) => (
+            <input
+              type="number"
+              min="-1"
+              max="1"
+              step="0.1"
+              className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              value={val ?? ''}
+              onChange={(e) => onChange(e.target.value)}
+            />
+          ),
+          render: (p) => <span className="tabular-nums">{Number(p.value).toFixed(2)}</span>,
+        },
+      ]}
+    />
+  );
+
   const renderContent = () => {
-    const tableProps = editable
+    const tableProps = canModifySelectedModel
       ? {
           insertData: currentInsertData,
           onInsertDataChange: setCurrentInsertData,
@@ -511,6 +769,10 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
       : {
           striped: true,
         };
+
+    if (selectedModel === 'PREFERENCE') {
+      return renderPreferenceTable(tableProps);
+    }
 
     switch (selectedModel) {
       case 'CAMPUS': return (<Table {...tableProps} data={campusQuery.data?.listCampus} loading={campusQuery.loading} error={campusQuery.error} columns={[{ header: 'Key', render: (c) => <span className="text-xs font-mono text-gray-500">{c.key}</span> }, { header: 'Name', inputKey: 'name', render: (c) => <span className="font-semibold">{c.name}</span> }, { header: 'Address', inputKey: 'address', render: (c) => c.address },]} />);
@@ -544,7 +806,7 @@ export function ConsoleView({ editable = false }: ConsoleViewProps) {
               </div>
             )}
           </div>
-          {editable && <button onClick={handleApply} disabled={!hasTotalPending} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all flex items-center gap-2"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Apply Changes</button>}
+          {canModifySelectedModel && <button onClick={handleApply} disabled={!hasTotalPending} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all flex items-center gap-2"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Apply Changes</button>}
         </div>
         {renderContent()}
       </section>

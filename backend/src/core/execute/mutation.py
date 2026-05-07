@@ -9,15 +9,69 @@ from shared.model.course import CourseInput
 from shared.model.activity import ActivityInput
 from shared.model.course_teacher import CourseTeacherInput
 from shared.model.allocation import AllocationInput
+from shared.model.preference import PreferenceInput, PreferenceModel
 import db as db
 from core.access_control import require_admin
 from .context import ExecutionContext
+from . import preference as preference_service
 from shared.key import Key
 
 
 @strawberry.type
 class Mutation:
     """Create, Update, Delete Operations"""
+
+    @strawberry.field
+    async def create_preference(
+        self,
+        user_key: strawberry.ID,
+        input: PreferenceInput,
+        info: strawberry.Info[ExecutionContext],
+    ) -> PreferenceModel:
+        preference = await preference_service.create_preference(
+            int(user_key),
+            input.to_pydantic(),
+        )
+        return PreferenceModel(
+            key=preference.key,
+            room_key=preference.room_key,
+            building_key=preference.building_key,
+            campus_key=preference.campus_key,
+            value=preference.value,
+        )
+
+    @strawberry.field
+    async def delete_preference(
+        self,
+        user_key: strawberry.ID,
+        preference_key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        await preference_service.delete_preference(
+            int(user_key),
+            int(preference_key),
+        )
+
+    @strawberry.field
+    async def update_preference(
+        self,
+        user_key: strawberry.ID,
+        preference_key: strawberry.ID,
+        input: PreferenceInput,
+        info: strawberry.Info[ExecutionContext],
+    ) -> PreferenceModel:
+        preference = await preference_service.update_preference(
+            int(user_key),
+            int(preference_key),
+            input.to_pydantic(),
+        )
+        return PreferenceModel(
+            key=preference.key,
+            room_key=preference.room_key,
+            building_key=preference.building_key,
+            campus_key=preference.campus_key,
+            value=preference.value,
+        )
 
     @strawberry.field
     async def create_campus(

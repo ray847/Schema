@@ -3,6 +3,7 @@
 *.db
 *.log
 logs/
+.test_tmp/
 
 .env
 __pycache__

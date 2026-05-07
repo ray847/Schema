@@ -68,6 +68,32 @@ class TableRegistry(enum.Enum):
             "type": "NOT NULL DEFAULT 'standard'",
         },
     )
+    PREFERENCE = Table(
+        primary_model=shared.model.PreferenceResponse,
+        foreign_models=(
+            shared.model.UserResponse,
+            shared.model.RoomResponse,
+            shared.model.BuildingResponse,
+            shared.model.CampusResponse,
+        ),
+        attr={
+            "user_key": "NOT NULL",
+            "value": "NOT NULL",
+        },
+        constraints=[
+            "CHECK (value >= -1.0 AND value <= 1.0)",
+            """
+CHECK (
+  (room_key IS NOT NULL)
+  + (building_key IS NOT NULL)
+  + (campus_key IS NOT NULL)
+  = 1
+)""",
+            "UNIQUE (user_key, room_key)",
+            "UNIQUE (user_key, building_key)",
+            "UNIQUE (user_key, campus_key)",
+        ],
+    )
 
     @staticmethod
     def generate_sql_schema() -> list[str]:

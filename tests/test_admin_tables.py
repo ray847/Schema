@@ -1,101 +1,4 @@
-import pytest
-
-
-PASSWORD = "secret-pass"
-
-
-LIST_QUERIES = {
-    "campus": """
-      query { listCampus { key name address } }
-    """,
-    "building": """
-      query { listBuilding { key name buildingType location campus { key name } } }
-    """,
-    "room": """
-      query { listRoom { key name roomType capacity facility building { key name } } }
-    """,
-    "person": """
-      query { listPerson { key personCode name role } }
-    """,
-    "course": """
-      query { listCourse { key courseCode name } }
-    """,
-    "activity": """
-      query { listActivity { key name person { key name } } }
-    """,
-    "course_teacher": """
-      query {
-        listCourseTeacher {
-          personKey
-          courseKey
-          responsibility
-          person { key name }
-          course { key name }
-        }
-      }
-    """,
-    "allocation": """
-      query {
-        listAllocation {
-          key
-          eventType
-          eventKey
-          startTime
-          endTime
-          room { key name building { key name } }
-        }
-      }
-    """,
-}
-
-
-def _find(items: list[dict], key: str, value: object) -> dict:
-    for item in items:
-        if item.get(key) == value:
-            return item
-    raise AssertionError(f"Could not find {key}={value!r} in {items!r}")
-
-
-@pytest.fixture(scope="module")
-def users(api):
-    admin = api.register("admin@example.test", PASSWORD)
-    assert admin["type"] == "admin"
-    assert admin["person_key"] is None
-
-    admin_token = api.token("admin@example.test", PASSWORD)
-    admin_me = api.me(admin_token)
-    assert admin_me["email"] == "admin@example.test"
-    assert admin_me["type"] == "admin"
-
-    standard = api.register("standard@example.test", PASSWORD)
-    assert standard["type"] == "standard"
-    standard_token = api.token("standard@example.test", PASSWORD)
-
-    return {
-        "admin": admin,
-        "admin_token": admin_token,
-        "standard": standard,
-        "standard_token": standard_token,
-    }
-
-
-def test_first_user_is_admin_and_second_user_is_standard(users):
-    assert users["admin"]["type"] == "admin"
-    assert users["standard"]["type"] == "standard"
-
-
-def test_admin_can_view_all_public_tables(api, users):
-    token = users["admin_token"]
-    for query in LIST_QUERIES.values():
-        data = api.graphql(query, token=token)
-        assert data
-
-
-def test_standard_user_can_view_all_public_tables(api, users):
-    token = users["standard_token"]
-    for query in LIST_QUERIES.values():
-        data = api.graphql(query, token=token)
-        assert data
+from tests.helpers import LIST_QUERIES, find_item
 
 
 def test_admin_can_insert_update_and_delete_all_tables(api, users):
@@ -117,7 +20,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    campus = _find(
+    campus = find_item(
         api.graphql(LIST_QUERIES["campus"], token=token)["listCampus"],
         "name",
         "Pytest Campus",
@@ -141,7 +44,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    building = _find(
+    building = find_item(
         api.graphql(LIST_QUERIES["building"], token=token)["listBuilding"],
         "name",
         "Pytest Building",
@@ -166,7 +69,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    room = _find(
+    room = find_item(
         api.graphql(LIST_QUERIES["room"], token=token)["listRoom"],
         "name",
         "Pytest Room",
@@ -189,7 +92,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    person = _find(
+    person = find_item(
         api.graphql(LIST_QUERIES["person"], token=token)["listPerson"],
         "personCode",
         "PTEST001",
@@ -211,7 +114,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    course = _find(
+    course = find_item(
         api.graphql(LIST_QUERIES["course"], token=token)["listCourse"],
         "courseCode",
         "PYTEST101",
@@ -233,7 +136,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    activity = _find(
+    activity = find_item(
         api.graphql(LIST_QUERIES["activity"], token=token)["listActivity"],
         "name",
         "Pytest Activity",
@@ -256,7 +159,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    course_teacher = _find(
+    course_teacher = find_item(
         api.graphql(LIST_QUERIES["course_teacher"], token=token)["listCourseTeacher"],
         "responsibility",
         "Assistant",
@@ -281,7 +184,7 @@ def test_admin_can_insert_update_and_delete_all_tables(api, users):
         },
         token,
     )
-    allocation = _find(
+    allocation = find_item(
         api.graphql(LIST_QUERIES["allocation"], token=token)["listAllocation"],
         "eventKey",
         int(course["key"]),

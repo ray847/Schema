@@ -20,7 +20,7 @@ function App() {
       <header className="app-header">
         <div>
           <p className="eyebrow">
-            {isAdmin ? 'Admin console' : 'Spectate mode'}
+            {isAdmin ? 'Admin console' : user ? `${user.type} console` : 'Spectate mode'}
           </p>
           <h1>Schema</h1>
         </div>
@@ -41,12 +41,12 @@ function App() {
       {!isAdmin && (
         <section className="mode-banner">
           <div>
-            <strong>Read-only table browser</strong>
-            <p>Sign in with an admin account to insert, update, or delete rows.</p>
+            <strong>{user ? 'Editable preferences' : 'Read-only table browser'}</strong>
+            <p>{user ? 'Your preference table is available to edit. Other tables remain admin-only.' : 'Sign in with an admin account to insert, update, or delete rows.'}</p>
           </div>
         </section>
       )}
-      <ConsoleView editable={isAdmin} />
+      <ConsoleView editable={isAdmin} currentUser={user} />
       {!user && (
         <section id="auth" className="inline-auth">
           <AuthView compact />
