@@ -52,6 +52,15 @@
   padding-left: 0.5rem;
 }
 
+.account-chip .role-pill {
+  background: #e0f2fe;
+  border-radius: 999px;
+  color: #0369a1;
+  font-size: 0.72rem;
+  padding: 0.18rem 0.5rem;
+  text-transform: capitalize;
+}
+
 .account-chip button,
 .secondary-action {
   background: white;
@@ -67,6 +76,38 @@
 .account-chip button:hover,
 .secondary-action:hover {
   background: #f1f5f9;
+}
+
+.secondary-action {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.mode-banner {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+}
+
+.mode-banner strong {
+  color: #0f172a;
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.mode-banner p {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.inline-auth {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
 .auth-page,

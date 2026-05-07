@@ -3,7 +3,11 @@ import { useAuth } from '../AuthContext';
 
 type AuthMode = 'login' | 'register';
 
-export function AuthView() {
+interface AuthViewProps {
+  compact?: boolean;
+}
+
+export function AuthView({ compact = false }: AuthViewProps) {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -29,9 +33,8 @@ export function AuthView() {
     }
   };
 
-  return (
-    <main className="auth-page">
-      <section className="auth-panel" aria-labelledby="auth-title">
+  const content = (
+    <section className="auth-panel" aria-labelledby="auth-title">
         <div className="auth-heading">
           <p className="eyebrow">Schema Access</p>
           <h1 id="auth-title">
@@ -102,6 +105,9 @@ export function AuthView() {
           </button>
         </form>
       </section>
-    </main>
   );
+
+  if (compact) return content;
+
+  return <main className="auth-page">{content}</main>;
 }

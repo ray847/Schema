@@ -5,6 +5,7 @@ import './App.css';
 
 function App() {
   const { user, loading, signOut } = useAuth();
+  const isAdmin = user?.type === 'admin';
 
   if (loading) {
     return (
@@ -14,43 +15,43 @@ function App() {
     );
   }
 
-  if (!user) {
-    return <AuthView />;
-  }
-
-  if (user.type !== 'admin') {
-    return (
-      <main className="status-page">
-        <section className="status-panel">
-          <p className="eyebrow">Signed in</p>
-          <h1>Console unavailable</h1>
-          <p>
-            {user.email} is registered as {user.type}. The database console is
-            only visible to admin users.
-          </p>
-          <button className="secondary-action" onClick={signOut} type="button">
-            Sign out
-          </button>
-        </section>
-      </main>
-    );
-  }
-
   return (
     <div className="container">
       <header className="app-header">
         <div>
-          <p className="eyebrow">Admin console</p>
+          <p className="eyebrow">
+            {isAdmin ? 'Admin console' : 'Spectate mode'}
+          </p>
           <h1>Schema</h1>
         </div>
-        <div className="account-chip">
-          <span>{user.email}</span>
-          <button onClick={signOut} type="button">
-            Sign out
-          </button>
-        </div>
+        {user ? (
+          <div className="account-chip">
+            <span>{user.email}</span>
+            <span className="role-pill">{user.type}</span>
+            <button onClick={signOut} type="button">
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <a className="secondary-action" href="#auth">
+            Sign in
+          </a>
+        )}
       </header>
-      <ConsoleView />
+      {!isAdmin && (
+        <section className="mode-banner">
+          <div>
+            <strong>Read-only table browser</strong>
+            <p>Sign in with an admin account to insert, update, or delete rows.</p>
+          </div>
+        </section>
+      )}
+      <ConsoleView editable={isAdmin} />
+      {!user && (
+        <section id="auth" className="inline-auth">
+          <AuthView compact />
+        </section>
+      )}
     </div>
   );
 }

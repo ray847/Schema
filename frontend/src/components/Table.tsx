@@ -87,6 +87,7 @@ export function Table<T extends { key: string }>({
 }: TableProps<T>) {
   const [internalInsertData, setInternalInsertData] = useState<Record<string, any>>({});
   const [internalEditData, setInternalEditData] = useState<Record<string, any>>({});
+  const visibleColumns = columns.filter(col => col.header.toLowerCase() !== 'key');
   
   const insertData = externalInsertData || internalInsertData;
   const setInsertData = (newData: Record<string, any>) => {
@@ -109,7 +110,7 @@ export function Table<T extends { key: string }>({
 
   const handleStartEdit = (item: T) => {
     const initialData: Record<string, any> = {};
-    columns.forEach(col => {
+    visibleColumns.forEach(col => {
       if (col.inputKey) {
         initialData[col.inputKey] = (item as any)[col.inputKey];
       }
@@ -131,7 +132,7 @@ export function Table<T extends { key: string }>({
       <table className={tableVariants({ striped })}>
         <thead className="bg-gray-50/80 border-b border-gray-200">
           <tr>
-            {columns.map((col, i) => (
+            {visibleColumns.map((col, i) => (
               <th 
                 key={i} 
                 className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600"
@@ -149,7 +150,7 @@ export function Table<T extends { key: string }>({
         <tbody className="divide-y divide-gray-100 bg-white">
           {onInsert && (
             <tr className="bg-blue-50/30">
-              {columns.map((col, i) => (
+              {visibleColumns.map((col, i) => (
                 <td key={i} className="px-4 py-2">
                   {col.inputKey ? (
                     col.renderInput ? (
@@ -184,7 +185,7 @@ export function Table<T extends { key: string }>({
           )}
           {pendingData?.map((item) => (
             <tr key={item.key} className="bg-amber-50/50 italic border-l-4 border-l-amber-400">
-              {columns.map((col, i) => (
+              {visibleColumns.map((col, i) => (
                 <td key={i} className="px-4 py-3 text-gray-600">
                   {col.render(item)}
                 </td>
@@ -224,7 +225,7 @@ export function Table<T extends { key: string }>({
                   isEditing && "bg-indigo-50/30 ring-2 ring-inset ring-indigo-500/20"
                 )}
               >
-                {columns.map((col, i) => (
+                {visibleColumns.map((col, i) => (
                   <td key={i} className={cn("px-4 py-3 text-gray-700", isPendingDelete && "line-through")}>
                     {isEditing && col.inputKey ? (
                       col.renderInput ? (
@@ -349,7 +350,7 @@ export function Table<T extends { key: string }>({
           })}
           {!hasData && !onInsert && (
             <tr>
-              <td colSpan={columns.length + (onSelect || onDelete || onUndoDelete || onEdit || onUndoUpdate ? 1 : 0)} className="p-8 text-center italic text-gray-500">
+              <td colSpan={visibleColumns.length + (onSelect || onDelete || onUndoDelete || onEdit || onUndoUpdate ? 1 : 0)} className="p-8 text-center italic text-gray-500">
                 No data found.
               </td>
             </tr>
