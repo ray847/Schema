@@ -1,35 +1,99 @@
 direction: down
 
-frontend.Static -> backend.api.CRUD: Hard Coded GraphQL
-frontend.Dynamic -> backend.api.CRUD: Generated GraphQL
-
-backend: {
-  api.CRUD -> core.Interface
-  core.Execution -> db.Interface.Public
-  core.Verification -> db.Interface.User
-  api: {
-    CRUD: CRUD Request \n User Key & GraphQL
-  }
-  core: {
-    Interface -> Verification: User Key
-    Interface -> Execution: GraphQL
-    Verification -> Execution: User Priviledge
-    Interface: CRUD Interface
-    Verification: Priviledge Verification
-    Execution: Execution \n (GraphQL)
-  }
-  db: {
-    Interface.Public -> SQLite3
-    Interface.User -> SQLite3
-    Interface: {
-      Public: Public Info Interface
-      User: User Info Interface
-    }
-    SQLite3
+classes: {
+  State: {
+    style.border-radius: 1000
   }
 }
 
+frontend.api.Authentication -> backend.api.CRUD
+frontend.api.ApolloClient -> backend.api.Authentication
+
 frontend: {
-  Static: Static Request
-  Dynamic: Dynamic Request
+  pages -> components
+  pages.Login -> features.Authentication
+  pages.Plan -> features.Planning
+  pages.Preferences -> features.Preference
+  pages.Console -> features.Console
+
+  features.Authentication -> api.Authentication
+  features.Planning -> domain.Tasks
+  features.Planning -> domain.NL Process
+  features.Planning -> domain.LP Solve
+  features.Planning -> domain.Routes
+  features.Planning -> api.ApolloClient
+  features.Preference -> api.ApolloClient
+  features.Console -> api.ApolloClient
+  features.NL Query -> domain.NL Process
+  features.NL Query -> api.ApolloClient
+
+  pages: {
+    Login: Login / Register
+    Plan: {
+      direction: right
+      # Task List -> Problem -> Solving -> Routes
+      label: Planning Query
+      Task List.class: State
+      Problem: {
+        label: Problem Definition
+        class: State
+        style.stroke-dash: 3
+      }
+      Solving: {
+        label: Solving\n(LP Problem)
+        class: State
+        style.stroke-dash: 3
+      }
+      Routes.class: State
+    }
+    Preferences
+    Console: Admin Console
+  }
+  components: {
+    height: 200
+    width: 200
+  }
+  features: {
+    Planning
+    NL Query
+    Authentication
+    Preference: Preference View
+    Console: Console View
+  }
+  domain: {
+    Tasks
+    Routes
+    LP Solve
+    NL Process
+  }
+  api: {
+    ApolloClient: ApolloClient\n(GraphQL)
+    Authentication
+  }
+}
+
+backend: {
+  api.CRUD -> core.Interface
+  api.Authentication <-> core.Authentication
+  core.Execution -> db.Functional Interface
+  core.Authorization <-> db.Functional Interface: Privilege Check
+  core.Authentication <-> db.Functional Interface
+  api: {
+    CRUD: CRUD Request \n User Key & GraphQL
+    Authentication
+  }
+  core: {
+    Interface -> Authorization
+    Authorization -> Execution
+    Authentication: Authentication\n(Password Management)
+    Interface: CRUD Interface
+    Authorization: {
+      shape: diamond
+      label: Privilege Authorization
+    }
+    Execution: Execution\n(GraphQL -> DB)
+  }
+  db: {
+    Functional Interface -> SQLite3
+  }
 }

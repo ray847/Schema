@@ -10,7 +10,7 @@ const config: CodegenConfig = {
   
   generates: {
     // 3. THIS is the magic preset that writes TypeScript!
-    './src/generated/': {
+    './src/api/generated/': {
       preset: 'client',
       plugins: [],
     }

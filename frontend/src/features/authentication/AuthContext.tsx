@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -16,26 +14,16 @@ import {
   type CurrentUser,
   type LoginInput,
   type RegisterInput,
-} from './auth';
-
-interface AuthContextValue {
-  user: CurrentUser | null;
-  loading: boolean;
-  signIn: (input: LoginInput) => Promise<void>;
-  signUp: (input: RegisterInput) => Promise<void>;
-  signOut: () => void;
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+} from '../../api/authentication';
+import { AuthContext } from './authContextValue';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => Boolean(getStoredToken()));
 
   useEffect(() => {
     const token = getStoredToken();
     if (!token) {
-      setLoading(false);
       return;
     }
 
@@ -69,12 +57,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used inside AuthProvider');
-  }
-  return context;
 }

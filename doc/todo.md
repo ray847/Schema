@@ -4,9 +4,9 @@
 
 * ~~Add table editing.~~
 * ~~Implement user & preference system.~~
+* Frontend refactor
 * NL2SQL
 * Routing functionality
-* Frontend refactor
 
 ## Bug
 

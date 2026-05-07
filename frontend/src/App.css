@@ -83,6 +83,32 @@
   text-decoration: none;
 }
 
+.page-tabs {
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.page-tabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+}
+
+.page-tabs button.active {
+  border-bottom-color: #2563eb;
+  color: #0f172a;
+}
+
 .mode-banner {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -108,6 +134,113 @@
   display: flex;
   justify-content: center;
   margin-top: 2rem;
+}
+
+.page-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.feature-surface {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.feature-heading {
+  margin-bottom: 1rem;
+}
+
+.feature-heading h2 {
+  color: #111827;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0 0 0.35rem;
+}
+
+.feature-heading p {
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.state-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.state-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.state-card span {
+  align-items: center;
+  background: #dbeafe;
+  border-radius: 999px;
+  color: #1d4ed8;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 800;
+  height: 1.6rem;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+  width: 1.6rem;
+}
+
+.state-card h3 {
+  color: #111827;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  margin: 0 0 0.25rem;
+}
+
+.state-card p,
+.placeholder-note,
+.placeholder-panel p {
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.placeholder-note {
+  margin-top: 1rem;
+}
+
+.placeholder-panel {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.stacked-field {
+  color: #334155;
+  display: grid;
+  font-size: 0.9rem;
+  font-weight: 700;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.stacked-field textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #111827;
+  font: inherit;
+  min-height: 6rem;
+  padding: 0.75rem 0.85rem;
+  resize: vertical;
+}
+
+.stacked-field textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  outline: none;
 }
 
 .auth-page,
@@ -254,6 +387,10 @@
 
   .account-chip {
     justify-content: space-between;
+  }
+
+  .state-grid {
+    grid-template-columns: 1fr;
   }
 
   .auth-page,

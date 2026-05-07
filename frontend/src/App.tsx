@@ -1,11 +1,27 @@
-import { ConsoleView } from './components/ConsoleView.tsx';
-import { AuthView } from './components/AuthView.tsx';
-import { useAuth } from './AuthContext.tsx';
+import { useState } from 'react';
+import { useAuth } from './features/authentication';
+import {
+  ConsolePage,
+  LoginPage,
+  PlanPage,
+  PreferencesPage,
+} from './pages';
 import './App.css';
+
+type AppPage = 'plan' | 'preferences' | 'console' | 'login';
+
+const pageOptions: { key: AppPage; label: string }[] = [
+  { key: 'plan', label: 'Plan' },
+  { key: 'preferences', label: 'Preferences' },
+  { key: 'console', label: 'Console' },
+  { key: 'login', label: 'Login' },
+];
 
 function App() {
   const { user, loading, signOut } = useAuth();
+  const [activePage, setActivePage] = useState<AppPage>('plan');
   const isAdmin = user?.type === 'admin';
+  const currentPage = user && activePage === 'login' ? 'plan' : activePage;
 
   if (loading) {
     return (
@@ -15,14 +31,31 @@ function App() {
     );
   }
 
+  const visiblePages = user
+    ? pageOptions.filter((page) => page.key !== 'login')
+    : pageOptions;
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'plan':
+        return <PlanPage />;
+      case 'preferences':
+        return <PreferencesPage currentUser={user} />;
+      case 'console':
+        return <ConsolePage currentUser={user} />;
+      case 'login':
+        return <LoginPage />;
+    }
+  };
+
   return (
     <div className="container">
       <header className="app-header">
         <div>
           <p className="eyebrow">
-            {isAdmin ? 'Admin console' : user ? `${user.type} console` : 'Spectate mode'}
+            {isAdmin ? 'Admin console' : user ? `${user.type} workspace` : 'Spectate mode'}
           </p>
-          <h1>Schema</h1>
+          <h1>Space Planning</h1>
         </div>
         {user ? (
           <div className="account-chip">
@@ -33,25 +66,30 @@ function App() {
             </button>
           </div>
         ) : (
-          <a className="secondary-action" href="#auth">
+          <button
+            className="secondary-action"
+            onClick={() => setActivePage('login')}
+            type="button"
+          >
             Sign in
-          </a>
+          </button>
         )}
       </header>
-      {!isAdmin && (
-        <section className="mode-banner">
-          <div>
-            <strong>{user ? 'Editable preferences' : 'Read-only table browser'}</strong>
-            <p>{user ? 'Your preference table is available to edit. Other tables remain admin-only.' : 'Sign in with an admin account to insert, update, or delete rows.'}</p>
-          </div>
-        </section>
-      )}
-      <ConsoleView editable={isAdmin} currentUser={user} />
-      {!user && (
-        <section id="auth" className="inline-auth">
-          <AuthView compact />
-        </section>
-      )}
+
+      <nav className="page-tabs" aria-label="Application pages">
+        {visiblePages.map((page) => (
+          <button
+            className={currentPage === page.key ? 'active' : ''}
+            key={page.key}
+            onClick={() => setActivePage(page.key)}
+            type="button"
+          >
+            {page.label}
+          </button>
+        ))}
+      </nav>
+
+      {renderPage()}
     </div>
   );
 }

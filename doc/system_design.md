@@ -21,6 +21,8 @@
 
 ## 架构设计
 
+![Software](asset/software_architecture.svg)
+
 ### ToolChain
 
 **API**:
@@ -60,3 +62,25 @@ This design keeps three responsibilities separate:
 The wrapper model also improves safety and observability. Values are passed through SQLite parameter binding rather than string interpolation, reducing SQL injection risk for data values. The shared logging utility records generated SQL commands, executed SQL commands, arguments, commits, row counts, and SQLite errors. The log directory is configured by `LOG_DIR` in `.env`, with `logs/database.log` as the default target.
 
 For initialization, `db.setup()` asks `TableRegistry` to generate all schema statements and executes them before optional debug seed data is inserted. Cleanup is isolated in `db.clean()`, which removes the configured SQLite file and records the operation in the same log stream.
+
+### Frontend
+
+#### Pages
+
+Different application pages. Very simple calls to functions / variables in other modules.
+
+#### Components
+
+Reusable React components, e.g. Table, List, Button, etc.
+
+#### Features
+
+Relatively high level features.
+
+#### Api
+
+Wrappers to GraphQL & https queries.
+
+#### Domain
+
+Pure `typescript` logic. Act as basis for high level features.

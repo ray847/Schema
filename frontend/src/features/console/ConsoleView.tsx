@@ -1,11 +1,11 @@
 import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useState, useEffect } from 'react';
-import { graphql } from '../generated/gql';
-import type { CurrentUser } from '../auth';
-import { Table } from './Table';
-import { Selector } from './Selector';
-import { Popout } from './Popout';
+import { graphql } from '../../api/generated/gql';
+import type { CurrentUser } from '../../api/authentication';
+import { Table } from '../../components/Table';
+import { Selector } from '../../components/Selector';
+import { Popout } from '../../components/Popout';
 
 const LIST_CAMPUS = graphql(`
   query ListCampus {
@@ -405,7 +405,7 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
   const [deletePreference] = useMutation(DELETE_PREFERENCE);
   const [updatePreference] = useMutation(UPDATE_PREFERENCE);
 
-  const safeJsonParse = (str: string) => { try { return JSON.parse(str || '{}'); } catch (e) { return {}; } };
+  const safeJsonParse = (str: string) => { try { return JSON.parse(str || '{}'); } catch { return {}; } };
   const formatDateTime = (dt: any) => {
     if (!dt) return '';
     const d = new Date(dt);
@@ -500,7 +500,7 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
   };
 
   const handleConfirmInsert = (item: Record<string, any>) => {
-    const newItem = { ...item, key: `pending-${Date.now()}-${pendingChanges[selectedModel].length}` };
+    const newItem = { ...item, key: `pending-${selectedModel}-${pendingChanges[selectedModel].length}` };
     setPendingChanges(prev => ({ ...prev, [selectedModel]: [...prev[selectedModel], newItem] }));
     setCurrentInsertData({});
   };
