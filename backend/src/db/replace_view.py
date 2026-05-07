@@ -1,9 +1,7 @@
-import json
-import enum
-import pydantic
 import shared
 from .table_view import TableView
 from .sql_command import SQLCommand
+from .sqlite_value import to_sqlite_value
 
 
 class ReplaceView:
@@ -21,17 +19,9 @@ class ReplaceView:
 
         set_clause = ", ".join([f"{k} = ?" for k in self.replacements.keys()])
 
-        # Convert values to sqlite-compatible types
-        processed_values = []
-        for value in self.replacements.values():
-            if isinstance(value, (dict, list)):
-                processed_values.append(json.dumps(value))
-            elif isinstance(value, enum.Enum):
-                processed_values.append(value.value)
-            elif isinstance(value, pydantic.BaseModel):
-                processed_values.append(value.model_dump_json())
-            else:
-                processed_values.append(value)
+        processed_values = [
+            to_sqlite_value(value) for value in self.replacements.values()
+        ]
 
         if isinstance(self.key, dict):
             where_clause = " AND ".join([f"{k} = ?" for k in self.key.keys()])

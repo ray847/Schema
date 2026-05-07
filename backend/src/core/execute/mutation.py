@@ -10,6 +10,7 @@ from shared.model.activity import ActivityInput
 from shared.model.course_teacher import CourseTeacherInput
 from shared.model.allocation import AllocationInput
 import db as db
+from core.access_control import require_admin
 from .context import ExecutionContext
 from shared.key import Key
 
@@ -22,6 +23,7 @@ class Mutation:
     async def create_campus(
         self, inputs: list[CampusInput], info: strawberry.Info[ExecutionContext]
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.CAMPUS).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -33,6 +35,7 @@ class Mutation:
         inputs: list[BuildingInput],
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.BUILDING).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -42,6 +45,7 @@ class Mutation:
     async def create_room(
         self, inputs: list[RoomInput], info: strawberry.Info[ExecutionContext]
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.ROOM).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -51,6 +55,7 @@ class Mutation:
     async def create_person(
         self, inputs: list[PersonInput], info: strawberry.Info[ExecutionContext]
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.PERSON).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -60,6 +65,7 @@ class Mutation:
     async def create_course(
         self, inputs: list[CourseInput], info: strawberry.Info[ExecutionContext]
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.COURSE).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -71,6 +77,7 @@ class Mutation:
         inputs: list[ActivityInput],
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.ACTIVITY).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -82,6 +89,7 @@ class Mutation:
         inputs: list[CourseTeacherInput],
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.COURSE_TEACHER).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -93,6 +101,7 @@ class Mutation:
         inputs: list[AllocationInput],
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.ALLOCATION).append(
             [input.to_pydantic() for input in inputs]
         )
@@ -105,6 +114,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.CAMPUS.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -122,6 +132,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.BUILDING.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -139,6 +150,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.ROOM.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -156,6 +168,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.PERSON.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -173,6 +186,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.COURSE.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -190,6 +204,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.ACTIVITY.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -208,6 +223,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.COURSE_TEACHER.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -229,6 +245,7 @@ class Mutation:
         course_key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         composite_key = {
             "person_key": int(person_key),
             "course_key": int(course_key),
@@ -243,6 +260,7 @@ class Mutation:
         replacements: JSON,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         model = db.TableRegistry.ALLOCATION.value.primary_model
         data = replacements if isinstance(replacements, dict) else {}
         filtered = {
@@ -259,6 +277,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.CAMPUS).pop(Key[Literal["Campus"]](key))
         _ = await info.context.db_context.execute(view)
 
@@ -268,6 +287,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.BUILDING).pop(
             Key[Literal["Building"]](key)
         )
@@ -279,6 +299,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.ROOM).pop(Key[Literal["Room"]](key))
         _ = await info.context.db_context.execute(view)
 
@@ -288,6 +309,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.PERSON).pop(Key[Literal["Person"]](key))
         _ = await info.context.db_context.execute(view)
 
@@ -297,6 +319,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.COURSE).pop(Key[Literal["Course"]](key))
         _ = await info.context.db_context.execute(view)
 
@@ -306,6 +329,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.ACTIVITY).pop(
             Key[Literal["Activity"]](key)
         )
@@ -317,6 +341,7 @@ class Mutation:
         key: strawberry.ID,
         info: strawberry.Info[ExecutionContext],
     ) -> None:
+        require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.ALLOCATION).pop(
             Key[Literal["Allocation"]](key)
         )

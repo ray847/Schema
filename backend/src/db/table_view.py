@@ -9,7 +9,3 @@ class TableView:
     @property
     def sql(self) -> list[SQLCommand]:
         return [SQLCommand(f"SELECT * FROM {self.table.value.name}", ())]
-
-    # @property
-    # def priviledge(self) -> shared.Priviledge:
-    #     return shared.Priviledge(0, 1, 0, 0)

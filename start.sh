@@ -1,5 +1,5 @@
 #!/bin/bash
-DB_FILE="backend/srd/db_file.db"
+DB_FILE="backend/src/db_file.db"
 
 if [ "$1" == "backend" ]; then
     if [ "$2" == "--clean" ]; then
@@ -13,6 +13,8 @@ if [ "$1" == "backend" ]; then
 elif [ "$1" == "frontend" ]; then
     cd frontend
     npm run dev
+elif [ "$1" == "test" ]; then
+    python -m pytest tests
 else
-    echo "Usage: ./start.sh [backend|frontend] [--clean]"
+    echo "Usage: ./start.sh [backend|frontend|test] [--clean]"
 fi

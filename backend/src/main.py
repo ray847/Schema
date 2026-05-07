@@ -38,6 +38,7 @@ app.add_middleware(
 )
 
 app.include_router(api.graphql_router, prefix="/graphql")
+app.include_router(api.auth_router)
 
 
 @app.get("/health", tags=["System"])

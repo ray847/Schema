@@ -36,14 +36,19 @@ def execute_logged(
 
 def setup():
     sql_schema = TableRegistry.generate_sql_schema()
-    context = DBContext()
-    # Directly execute schema.
-    for statement in sql_schema:
-        execute_logged(context.conn, "CREATE", statement)
-    if settings.debug:
-        insert_mock_data(conn=context.conn)
-    context.conn.commit()
-    log("COMMIT", "Committed database setup transaction")
+    context = DBContext(keep_connection=True)
+    try:
+        if context.conn is None:
+            raise RuntimeError("Database setup connection was not opened")
+        # Directly execute schema.
+        for statement in sql_schema:
+            execute_logged(context.conn, "CREATE", statement)
+        if settings.debug:
+            insert_mock_data(conn=context.conn)
+        context.conn.commit()
+        log("COMMIT", "Committed database setup transaction")
+    finally:
+        context.close()
 
 
 def insert_mock_data(conn: sqlite3.Connection):

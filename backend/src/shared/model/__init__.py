@@ -23,6 +23,7 @@ from .allocation import (
     EventType,
 )
 from .facility import Facility
+from .user import UserCreate, UserResponse, UserPublic, UserModel, UserType
 
 __all__ = [
     "CampusCreate",
@@ -59,4 +60,9 @@ __all__ = [
     "AllocationInput",
     "EventType",
     "Facility",
+    "UserCreate",
+    "UserResponse",
+    "UserPublic",
+    "UserModel",
+    "UserType",
 ]

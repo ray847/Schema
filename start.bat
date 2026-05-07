@@ -13,7 +13,9 @@ if "%1"=="backend" (
 ) else if "%1"=="frontend" (
     cd frontend
     npm run dev
+) else if "%1"=="test" (
+    python -m pytest tests
 ) else (
-    echo Usage: start.bat [backend|frontend] [--clean]
+    echo Usage: start.bat [backend^|frontend^|test] [--clean]
 )
 

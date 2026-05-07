@@ -5,8 +5,16 @@ description = "Daily campus routing helper backend."
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.110.0",
+    "pyjwt>=2.8.0",
     "uvicorn>=0.29.0",
+    "pwdlib[argon2]>=0.2.0",
     "pydantic-settings>=2.2.1",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0.0",
 ]
 
 [build-system]

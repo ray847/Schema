@@ -1,8 +1,7 @@
-import json
-import enum
 import pydantic
 from .table_view import TableView
 from .sql_command import SQLCommand
+from .sqlite_value import to_sqlite_value
 
 
 class AppendView:
@@ -20,17 +19,9 @@ class AppendView:
             cols = ", ".join(data.keys())
             placeholders = ", ".join(["?" for _ in data])
 
-            # Convert values to sqlite-compatible types
-            processed_values = []
-            for value in data.values():
-                if isinstance(value, (dict, list)):
-                    processed_values.append(json.dumps(value))
-                elif isinstance(value, enum.Enum):
-                    processed_values.append(value.value)
-                elif isinstance(value, pydantic.BaseModel):
-                    processed_values.append(value.model_dump_json())
-                else:
-                    processed_values.append(value)
+            processed_values = [
+                to_sqlite_value(value) for value in data.values()
+            ]
 
             commands.append(
                 SQLCommand(

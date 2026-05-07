@@ -58,7 +58,16 @@ class TableRegistry(enum.Enum):
         },
         constraints=["CHECK (start_time < end_time)"]
     )
-    # USER = Table(priviledge=PRIVATE_PRIVILEDGE, primary_model=User)
+    USER = Table(
+        primary_model=shared.model.UserResponse,
+        foreign_models=(shared.model.PersonResponse,),
+        attr={
+            "person_key": "UNIQUE",
+            "email": "UNIQUE NOT NULL",
+            "password_hash": "NOT NULL",
+            "type": "NOT NULL DEFAULT 'standard'",
+        },
+    )
 
     @staticmethod
     def generate_sql_schema() -> list[str]:
