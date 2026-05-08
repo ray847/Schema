@@ -1,13 +1,12 @@
 import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useState, useEffect } from 'react';
-import { graphql } from '../../api/generated/gql';
 import type { CurrentUser } from '../../api/authentication';
 import { Table } from '../../components/Table';
 import { Selector } from '../../components/Selector';
 import { Popout } from '../../components/Popout';
 
-const LIST_CAMPUS = graphql(`
+const LIST_CAMPUS = gql`
   query ListCampus {
     listCampus {
       key
@@ -15,27 +14,27 @@ const LIST_CAMPUS = graphql(`
       address
     }
   }
-`);
+`;
 
-const CREATE_CAMPUS = graphql(`
+const CREATE_CAMPUS = gql`
   mutation CreateCampus($inputs: [CampusInput!]!) {
     createCampus(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_CAMPUS = graphql(`
+const DELETE_CAMPUS = gql`
   mutation DeleteCampus($key: ID!) {
     deleteCampus(key: $key)
   }
-`);
+`;
 
-const UPDATE_CAMPUS = graphql(`
+const UPDATE_CAMPUS = gql`
   mutation UpdateCampus($key: ID!, $replacements: JSON!) {
     updateCampus(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const LIST_BUILDING = graphql(`
+const LIST_BUILDING = gql`
   query ListBuilding {
     listBuilding {
       key
@@ -48,27 +47,27 @@ const LIST_BUILDING = graphql(`
       }
     }
   }
-`);
+`;
 
-const CREATE_BUILDING = graphql(`
+const CREATE_BUILDING = gql`
   mutation CreateBuilding($inputs: [BuildingInput!]!) {
     createBuilding(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_BUILDING = graphql(`
+const DELETE_BUILDING = gql`
   mutation DeleteBuilding($key: ID!) {
     deleteBuilding(key: $key)
   }
-`);
+`;
 
-const UPDATE_BUILDING = graphql(`
+const UPDATE_BUILDING = gql`
   mutation UpdateBuilding($key: ID!, $replacements: JSON!) {
     updateBuilding(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const LIST_ROOM = graphql(`
+const LIST_ROOM = gql`
   query ListRoom {
     listRoom {
       key
@@ -82,27 +81,27 @@ const LIST_ROOM = graphql(`
       }
     }
   }
-`);
+`;
 
-const CREATE_ROOM = graphql(`
+const CREATE_ROOM = gql`
   mutation CreateRoom($inputs: [RoomInput!]!) {
     createRoom(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_ROOM = graphql(`
+const DELETE_ROOM = gql`
   mutation DeleteRoom($key: ID!) {
     deleteRoom(key: $key)
   }
-`);
+`;
 
-const UPDATE_ROOM = graphql(`
+const UPDATE_ROOM = gql`
   mutation UpdateRoom($key: ID!, $replacements: JSON!) {
     updateRoom(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const LIST_PERSON = graphql(`
+const LIST_PERSON = gql`
   query ListPerson {
     listPerson {
       key
@@ -111,27 +110,27 @@ const LIST_PERSON = graphql(`
       role
     }
   }
-`);
+`;
 
-const CREATE_PERSON = graphql(`
+const CREATE_PERSON = gql`
   mutation CreatePerson($inputs: [PersonInput!]!) {
     createPerson(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_PERSON = graphql(`
+const DELETE_PERSON = gql`
   mutation DeletePerson($key: ID!) {
     deletePerson(key: $key)
   }
-`);
+`;
 
-const UPDATE_PERSON = graphql(`
+const UPDATE_PERSON = gql`
   mutation UpdatePerson($key: ID!, $replacements: JSON!) {
     updatePerson(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const LIST_COURSE = graphql(`
+const LIST_COURSE = gql`
   query ListCourse {
     listCourse {
       key
@@ -139,81 +138,81 @@ const LIST_COURSE = graphql(`
       name
     }
   }
-`);
+`;
 
-const CREATE_COURSE = graphql(`
+const CREATE_COURSE = gql`
   mutation CreateCourse($inputs: [CourseInput!]!) {
     createCourse(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_COURSE = graphql(`
+const DELETE_COURSE = gql`
   mutation DeleteCourse($key: ID!) {
     deleteCourse(key: $key)
   }
-`);
+`;
 
-const UPDATE_COURSE = graphql(`
+const UPDATE_COURSE = gql`
   mutation UpdateCourse($key: ID!, $replacements: JSON!) {
     updateCourse(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const CREATE_ACTIVITY = graphql(`
+const CREATE_ACTIVITY = gql`
   mutation CreateActivity($inputs: [ActivityInput!]!) {
     createActivity(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_ACTIVITY = graphql(`
+const DELETE_ACTIVITY = gql`
   mutation DeleteActivity($key: ID!) {
     deleteActivity(key: $key)
   }
-`);
+`;
 
-const UPDATE_ACTIVITY = graphql(`
+const UPDATE_ACTIVITY = gql`
   mutation UpdateActivity($key: ID!, $replacements: JSON!) {
     updateActivity(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const CREATE_COURSE_TEACHER = graphql(`
+const CREATE_COURSE_TEACHER = gql`
   mutation CreateCourseTeacher($inputs: [CourseTeacherInput!]!) {
     createCourseTeacher(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_COURSE_TEACHER = graphql(`
+const DELETE_COURSE_TEACHER = gql`
   mutation DeleteCourseTeacher($courseKey: ID!, $personKey: ID!) {
     deleteCourseTeacher(courseKey: $courseKey, personKey: $personKey)
   }
-`);
+`;
 
-const UPDATE_COURSE_TEACHER = graphql(`
+const UPDATE_COURSE_TEACHER = gql`
   mutation UpdateCourseTeacher($courseKey: ID!, $personKey: ID!, $replacements: JSON!) {
     updateCourseTeacher(courseKey: $courseKey, personKey: $personKey, replacements: $replacements)
   }
-`);
+`;
 
-const CREATE_ALLOCATION = graphql(`
+const CREATE_ALLOCATION = gql`
   mutation CreateAllocation($inputs: [AllocationInput!]!) {
     createAllocation(inputs: $inputs)
   }
-`);
+`;
 
-const DELETE_ALLOCATION = graphql(`
+const DELETE_ALLOCATION = gql`
   mutation DeleteAllocation($key: ID!) {
     deleteAllocation(key: $key)
   }
-`);
+`;
 
-const UPDATE_ALLOCATION = graphql(`
+const UPDATE_ALLOCATION = gql`
   mutation UpdateAllocation($key: ID!, $replacements: JSON!) {
     updateAllocation(key: $key, replacements: $replacements)
   }
-`);
+`;
 
-const LIST_ACTIVITY = graphql(`
+const LIST_ACTIVITY = gql`
   query ListActivity {
     listActivity {
       key
@@ -224,9 +223,9 @@ const LIST_ACTIVITY = graphql(`
       }
     }
   }
-`);
+`;
 
-const LIST_COURSE_TEACHER = graphql(`
+const LIST_COURSE_TEACHER = gql`
   query ListCourseTeacher {
     listCourseTeacher {
       personKey
@@ -242,9 +241,9 @@ const LIST_COURSE_TEACHER = graphql(`
       }
     }
   }
-`);
+`;
 
-const LIST_ALLOCATION = graphql(`
+const LIST_ALLOCATION = gql`
   query ListAllocation {
     listAllocation {
       key
@@ -262,7 +261,7 @@ const LIST_ALLOCATION = graphql(`
       }
     }
   }
-`);
+`;
 
 const LIST_PREFERENCE = gql`
   query ListPreference($userKey: ID!) {
@@ -357,14 +356,14 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
     }
   }, [currentUser, selectedModel]);
 
-  const campusQuery = useQuery(LIST_CAMPUS, { skip: selectedModel !== 'CAMPUS' && selectionConfig.model !== 'CAMPUS' && selectedModel !== 'PREFERENCE' });
-  const buildingQuery = useQuery(LIST_BUILDING, { skip: selectedModel !== 'BUILDING' && selectionConfig.model !== 'BUILDING' && selectedModel !== 'PREFERENCE' });
-  const roomQuery = useQuery(LIST_ROOM, { skip: selectedModel !== 'ROOM' && selectionConfig.model !== 'ROOM' && selectedModel !== 'PREFERENCE' });
-  const personQuery = useQuery(LIST_PERSON, { skip: selectedModel !== 'PERSON' && selectionConfig.model !== 'PERSON' });
-  const courseQuery = useQuery(LIST_COURSE, { skip: selectedModel !== 'COURSE' && selectionConfig.model !== 'COURSE' && selectedModel !== 'ALLOCATION' });
-  const activityQuery = useQuery(LIST_ACTIVITY, { skip: selectedModel !== 'ACTIVITY' && selectionConfig.model !== 'ACTIVITY' && selectedModel !== 'ALLOCATION' });
-  const courseTeacherQuery = useQuery(LIST_COURSE_TEACHER, { skip: selectedModel !== 'COURSE_TEACHER' });
-  const allocationQuery = useQuery(LIST_ALLOCATION, { skip: selectedModel !== 'ALLOCATION' });
+  const campusQuery = useQuery<any>(LIST_CAMPUS, { skip: selectedModel !== 'CAMPUS' && selectionConfig.model !== 'CAMPUS' && selectedModel !== 'PREFERENCE' });
+  const buildingQuery = useQuery<any>(LIST_BUILDING, { skip: selectedModel !== 'BUILDING' && selectionConfig.model !== 'BUILDING' && selectedModel !== 'PREFERENCE' });
+  const roomQuery = useQuery<any>(LIST_ROOM, { skip: selectedModel !== 'ROOM' && selectionConfig.model !== 'ROOM' && selectedModel !== 'PREFERENCE' });
+  const personQuery = useQuery<any>(LIST_PERSON, { skip: selectedModel !== 'PERSON' && selectionConfig.model !== 'PERSON' });
+  const courseQuery = useQuery<any>(LIST_COURSE, { skip: selectedModel !== 'COURSE' && selectionConfig.model !== 'COURSE' && selectedModel !== 'ALLOCATION' });
+  const activityQuery = useQuery<any>(LIST_ACTIVITY, { skip: selectedModel !== 'ACTIVITY' && selectionConfig.model !== 'ACTIVITY' && selectedModel !== 'ALLOCATION' });
+  const courseTeacherQuery = useQuery<any>(LIST_COURSE_TEACHER, { skip: selectedModel !== 'COURSE_TEACHER' });
+  const allocationQuery = useQuery<any>(LIST_ALLOCATION, { skip: selectedModel !== 'ALLOCATION' });
   const preferenceQuery = useQuery<ListPreferenceData, ListPreferenceVars>(LIST_PREFERENCE, {
     variables: { userKey: preferenceUserKey },
     skip: selectedModel !== 'PREFERENCE' || !currentUser,
@@ -769,8 +768,8 @@ export function ConsoleView({ editable = false, currentUser = null }: ConsoleVie
       case 'PERSON': return (<Table {...tableProps} data={personQuery.data?.listPerson} loading={personQuery.loading} error={personQuery.error} columns={[{ header: 'Key', render: (p) => <span className="text-xs font-mono text-gray-500">{p.key}</span> }, { header: 'Code', inputKey: 'personCode', render: (p) => <span className="font-mono">{p.personCode}</span> }, { header: 'Name', inputKey: 'name', render: (p) => <span className="font-semibold">{p.name}</span> }, { header: 'Role', inputKey: 'role', render: (p) => p.role },]} />);
       case 'COURSE': return (<Table {...tableProps} data={courseQuery.data?.listCourse} loading={courseQuery.loading} error={courseQuery.error} columns={[{ header: 'Key', render: (c) => <span className="text-xs font-mono text-gray-500">{c.key}</span> }, { header: 'Code', inputKey: 'courseCode', render: (c) => <span className="font-mono">{c.courseCode}</span> }, { header: 'Name', inputKey: 'name', render: (c) => <span className="font-semibold">{c.name}</span> },]} />);
       case 'ACTIVITY': return (<Table {...tableProps} data={activityQuery.data?.listActivity} loading={activityQuery.loading} error={activityQuery.error} columns={[{ header: 'Key', render: (a) => <span className="text-xs font-mono text-gray-500">{a.key}</span> }, { header: 'Name', inputKey: 'name', render: (a) => <span className="font-semibold">{a.name}</span> }, { header: 'Host', inputKey: 'personKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'PERSON', title: 'Select Host', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Host...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => <span className="text-primary font-medium">{(a.person || a.personKey)?.name}</span> },]} />);
-      case 'COURSE_TEACHER': return (<Table {...tableProps} data={courseTeacherQuery.data?.listCourseTeacher.map((ct, i) => ({ ...ct, key: `${ct.personKey}-${ct.courseKey}-${i}` }))} loading={courseTeacherQuery.loading} error={courseTeacherQuery.error} columns={[{ header: 'Teacher', inputKey: 'personKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'PERSON', title: 'Select Teacher', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Teacher...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (ct) => <span className="font-semibold">{(ct.person || ct.personKey)?.name}</span> }, { header: 'Course', inputKey: 'courseKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'COURSE', title: 'Select Course', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Course...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (ct) => <span className="text-primary font-medium">{(ct.course || ct.courseKey)?.name}</span> }, { header: 'Responsibility', inputKey: 'responsibility', render: (ct) => ct.responsibility },]} />);
-      case 'ALLOCATION': return (<Table {...tableProps} data={allocationQuery.data?.listAllocation} loading={allocationQuery.loading} error={allocationQuery.error} columns={[{ header: 'Key', render: (a) => <span className="text-xs font-mono text-gray-500">{a.key}</span> }, { header: 'Event Type', inputKey: 'eventType', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val || ''} onChange={(e) => onChange(e.target.value)}><option value="">Select Type</option><option value="ACTIVITY">Activity</option><option value="COURSE">Course</option></select>), render: (a) => <span className="capitalize">{a.eventType.toLowerCase()}</span> }, { header: 'Event', inputKey: 'eventKey', renderInput: (val, onChange, rowData) => (<button disabled={!rowData.eventType} onClick={() => setSelectionConfig({ isOpen: true, model: rowData.eventType as ModelType, title: `Select ${rowData.eventType}`, onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 disabled:bg-gray-50 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || (rowData.eventType ? `Pick ${rowData.eventType}...` : 'Pick type first')}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => { if (typeof a.eventKey === 'object' && (a.eventKey as any).name) return <span className="font-medium">{(a.eventKey as any).name}</span>; const idStr = String(a.eventKey); if (a.eventType === 'COURSE') { const course = courseQuery.data?.listCourse.find(c => c.key === idStr); return <span className="font-medium text-blue-600">{course ? course.name : `Course #${idStr}`}</span>; } if (a.eventType === 'ACTIVITY') { const activity = activityQuery.data?.listActivity.find(act => act.key === idStr); return <span className="font-medium text-green-600">{activity ? activity.name : `Activity #${idStr}`}</span>; } return <span className="font-medium text-gray-400">{idStr}</span>; } }, { header: 'Start Time', inputKey: 'startTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.startTime)}</span> }, { header: 'End Time', inputKey: 'endTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.endTime)}</span> }, { header: 'Room', inputKey: 'roomKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'ROOM', title: 'Select Room', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Room...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => <span className="font-medium">{(a.room || a.roomKey)?.name}</span> },]} />);
+      case 'COURSE_TEACHER': return (<Table {...tableProps} data={courseTeacherQuery.data?.listCourseTeacher.map((ct: any, i: number) => ({ ...ct, key: `${ct.personKey}-${ct.courseKey}-${i}` }))} loading={courseTeacherQuery.loading} error={courseTeacherQuery.error} columns={[{ header: 'Teacher', inputKey: 'personKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'PERSON', title: 'Select Teacher', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Teacher...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (ct) => <span className="font-semibold">{(ct.person || ct.personKey)?.name}</span> }, { header: 'Course', inputKey: 'courseKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'COURSE', title: 'Select Course', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Course...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (ct) => <span className="text-primary font-medium">{(ct.course || ct.courseKey)?.name}</span> }, { header: 'Responsibility', inputKey: 'responsibility', render: (ct) => ct.responsibility },]} />);
+      case 'ALLOCATION': return (<Table {...tableProps} data={allocationQuery.data?.listAllocation} loading={allocationQuery.loading} error={allocationQuery.error} columns={[{ header: 'Key', render: (a) => <span className="text-xs font-mono text-gray-500">{a.key}</span> }, { header: 'Event Type', inputKey: 'eventType', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val || ''} onChange={(e) => onChange(e.target.value)}><option value="">Select Type</option><option value="ACTIVITY">Activity</option><option value="COURSE">Course</option></select>), render: (a) => <span className="capitalize">{a.eventType.toLowerCase()}</span> }, { header: 'Event', inputKey: 'eventKey', renderInput: (val, onChange, rowData) => (<button disabled={!rowData.eventType} onClick={() => setSelectionConfig({ isOpen: true, model: rowData.eventType as ModelType, title: `Select ${rowData.eventType}`, onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 disabled:bg-gray-50 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || (rowData.eventType ? `Pick ${rowData.eventType}...` : 'Pick type first')}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => { if (typeof a.eventKey === 'object' && (a.eventKey as any).name) return <span className="font-medium">{(a.eventKey as any).name}</span>; const idStr = String(a.eventKey); if (a.eventType === 'COURSE') { const course = courseQuery.data?.listCourse.find((c: any) => c.key === idStr); return <span className="font-medium text-blue-600">{course ? course.name : `Course #${idStr}`}</span>; } if (a.eventType === 'ACTIVITY') { const activity = activityQuery.data?.listActivity.find((act: any) => act.key === idStr); return <span className="font-medium text-green-600">{activity ? activity.name : `Activity #${idStr}`}</span>; } return <span className="font-medium text-gray-400">{idStr}</span>; } }, { header: 'Start Time', inputKey: 'startTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.startTime)}</span> }, { header: 'End Time', inputKey: 'endTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.endTime)}</span> }, { header: 'Room', inputKey: 'roomKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'ROOM', title: 'Select Room', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Room...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => <span className="font-medium">{(a.room || a.roomKey)?.name}</span> },]} />);
     }
   };
 

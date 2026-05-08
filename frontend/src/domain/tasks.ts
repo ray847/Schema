@@ -1,3 +1,12 @@
+export class Task {
+  name!: string
+  tags!: TaskTag[]
+};
+
+export interface TaskTag {
+  name: string
+}
+
 export type TaskStatus = 'draft' | 'ready' | 'solving' | 'solved';
 
 export interface PlanningTask {

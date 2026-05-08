@@ -1,58 +1,57 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../lib/utils';
-
-const selectorVariants = cva(
-  "w-full min-w-[200px] rounded-md border-2 p-2.5 transition-all outline-none cursor-pointer text-lg",
-  {
-    variants: {
-      intent: {
-        primary: "border-primary bg-white text-gray-900 focus:ring-4 focus:ring-primary/20",
-        accent: "border-accent bg-accent-bg/5 text-accent focus:ring-4 focus:ring-accent/20",
-      },
-    },
-    defaultVariants: {
-      intent: "primary",
-    },
-  }
-);
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  type SelectChangeEvent,
+} from '@mui/material';
 
 interface Option<T> {
   value: T;
   label: string;
 }
 
-interface SelectorProps<T extends string> extends VariantProps<typeof selectorVariants> {
+interface SelectorProps<T extends string> {
   value: T;
   options: Option<T>[];
   onChange: (value: T) => void;
   title?: string;
   className?: string;
+  intent?: 'primary' | 'accent';
 }
 
 export function Selector<T extends string>({
   value,
   options,
   onChange,
-  title = "Select View",
-  intent,
+  title = 'Select View',
   className,
+  intent = 'primary',
 }: SelectorProps<T>) {
+  const labelId = `${title.toLowerCase().replace(/\s+/g, '-')}-label`;
+
   return (
-    <section className="mb-8 text-center">
-      <h2 className="mb-4 text-2xl font-medium tracking-tight text-gray-900 leading-tight">
+    <Box className={className} sx={{ mb: 4, textAlign: 'center' }}>
+      <Typography component="h2" sx={{ mb: 2 }} variant="h5">
         {title}
-      </h2>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as T)}
-        className={cn(selectorVariants({ intent }), className)}
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </section>
+      </Typography>
+      <FormControl color={intent === 'accent' ? 'secondary' : 'primary'} sx={{ minWidth: 240 }}>
+        <InputLabel id={labelId}>{title}</InputLabel>
+        <Select
+          label={title}
+          labelId={labelId}
+          onChange={(event: SelectChangeEvent) => onChange(event.target.value as T)}
+          value={value}
+        >
+          {options.map((opt) => (
+            <MenuItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   );
 }

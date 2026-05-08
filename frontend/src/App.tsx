@@ -1,20 +1,36 @@
 import { useState } from 'react';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import MapIcon from '@mui/icons-material/Map';
+import SettingsIcon from '@mui/icons-material/Settings';
+import StorageIcon from '@mui/icons-material/Storage';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { NavBar, NAV_BAR_EDGE_SIZE, type NavBarItem } from './components/NavBar';
 import { useAuth } from './features/authentication';
 import {
   ConsolePage,
   LoginPage,
   PlanPage,
-  PreferencesPage,
+  SettingsPage,
+  UserPage,
 } from './pages';
 import './App.css';
 
-type AppPage = 'plan' | 'preferences' | 'console' | 'login';
+type AppPage = 'plan' | 'console' | 'user' | 'settings' | 'login';
+type NavPage = Exclude<AppPage, 'login'>;
 
-const pageOptions: { key: AppPage; label: string }[] = [
-  { key: 'plan', label: 'Plan' },
-  { key: 'preferences', label: 'Preferences' },
-  { key: 'console', label: 'Console' },
-  { key: 'login', label: 'Login' },
+const pageOptions: NavBarItem<NavPage>[] = [
+  { key: 'plan', label: 'Plan', icon: <MapIcon /> },
+  { key: 'console', label: 'Console', icon: <StorageIcon /> },
+  { key: 'user', label: 'User', icon: <AccountCircleIcon /> },
+  { key: 'settings', label: 'Settings', icon: <SettingsIcon /> },
 ];
 
 function App() {
@@ -25,72 +41,85 @@ function App() {
 
   if (loading) {
     return (
-      <main className="status-page">
-        <p>Loading account...</p>
-      </main>
+      <Box component="main" sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100svh', p: 3 }}>
+        <Typography color="text.secondary">Loading account...</Typography>
+      </Box>
     );
   }
-
-  const visiblePages = user
-    ? pageOptions.filter((page) => page.key !== 'login')
-    : pageOptions;
 
   const renderPage = () => {
     switch (currentPage) {
       case 'plan':
         return <PlanPage />;
-      case 'preferences':
-        return <PreferencesPage currentUser={user} />;
       case 'console':
         return <ConsolePage currentUser={user} />;
+      case 'user':
+        return <UserPage currentUser={user} />;
+      case 'settings':
+        return <SettingsPage />;
       case 'login':
         return <LoginPage />;
     }
   };
 
   return (
-    <div className="container">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">
-            {isAdmin ? 'Admin console' : user ? `${user.type} workspace` : 'Spectate mode'}
-          </p>
-          <h1>Space Planning</h1>
-        </div>
-        {user ? (
-          <div className="account-chip">
-            <span>{user.email}</span>
-            <span className="role-pill">{user.type}</span>
-            <button onClick={signOut} type="button">
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <button
-            className="secondary-action"
-            onClick={() => setActivePage('login')}
-            type="button"
-          >
-            Sign in
-          </button>
-        )}
-      </header>
+    <>
+      <NavBar
+        activeKey={currentPage === 'login' ? undefined : currentPage}
+        ariaLabel="Application pages"
+        items={pageOptions}
+        onChange={(page) => setActivePage(page)}
+        side="left"
+      />
 
-      <nav className="page-tabs" aria-label="Application pages">
-        {visiblePages.map((page) => (
-          <button
-            className={currentPage === page.key ? 'active' : ''}
-            key={page.key}
-            onClick={() => setActivePage(page.key)}
-            type="button"
-          >
-            {page.label}
-          </button>
-        ))}
-      </nav>
+      <Box
+        component="main"
+        sx={{
+          ml: `${NAV_BAR_EDGE_SIZE}px`,
+          width: `calc(100vw - ${NAV_BAR_EDGE_SIZE}px)`,
+        }}
+      >
+        <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+          <Stack spacing={3}>
+            <Paper component="header" elevation={0} sx={{ p: 3 }}>
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={2}
+                sx={{
+                  alignItems: { xs: 'stretch', md: 'center' },
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Box>
+                  <Typography color="text.secondary" sx={{ fontWeight: 800, letterSpacing: 1.2 }} variant="overline">
+                    {isAdmin ? 'Admin console' : user ? `${user.type} workspace` : 'Spectate mode'}
+                  </Typography>
+                  <Typography variant="h3">Space Planning</Typography>
+                </Box>
 
-      {renderPage()}
-    </div>
+                {user ? (
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    <Typography color="text.secondary" variant="body2">
+                      {user.email}
+                    </Typography>
+                    <Chip label={user.type} size="small" />
+                    <Button onClick={signOut} variant="outlined">
+                      Sign out
+                    </Button>
+                  </Stack>
+                ) : (
+                  <Button onClick={() => setActivePage('login')} variant="outlined">
+                    Sign in
+                  </Button>
+                )}
+              </Stack>
+            </Paper>
+
+            {renderPage()}
+          </Stack>
+        </Container>
+      </Box>
+    </>
   );
 }
 

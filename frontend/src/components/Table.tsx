@@ -1,33 +1,24 @@
-import { ReactNode, useState } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../lib/utils';
-
-const tableContainerVariants = cva(
-  "w-full overflow-x-auto rounded-lg shadow-sm border border-gray-100",
-  {
-    variants: {
-      shadow: {
-        none: "shadow-none",
-        sm: "shadow-sm",
-        md: "shadow-md",
-      },
-    },
-    defaultVariants: {
-      shadow: "sm",
-    },
-  }
-);
-
-const tableVariants = cva("w-full border-collapse text-left text-sm", {
-  variants: {
-    striped: {
-      true: "[&_tbody_tr:nth-child(even)]:bg-gray-50/50",
-    },
-  },
-  defaultVariants: {
-    striped: false,
-  },
-});
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Stack,
+  Table as MuiTable,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 export interface Column<T> {
   header: string;
@@ -36,7 +27,7 @@ export interface Column<T> {
   renderInput?: (value: any, onChange: (val: any) => void, rowData: Record<string, any>) => ReactNode;
 }
 
-interface TableProps<T extends { key: string }> extends VariantProps<typeof tableContainerVariants>, VariantProps<typeof tableVariants> {
+interface TableProps<T extends { key: string } = any> {
   data: T[] | undefined;
   pendingData?: T[];
   pendingDeleteKeys?: string[];
@@ -45,6 +36,8 @@ interface TableProps<T extends { key: string }> extends VariantProps<typeof tabl
   loading: boolean;
   error?: any;
   className?: string;
+  shadow?: 'none' | 'sm' | 'md';
+  striped?: boolean;
   onInsert?: (item: Record<string, any>) => void;
   onDelete?: (item: T) => void;
   onUndoInsert?: (item: T) => void;
@@ -60,7 +53,16 @@ interface TableProps<T extends { key: string }> extends VariantProps<typeof tabl
   selectedKey?: string;
 }
 
-export function Table<T extends { key: string }>({
+const actionCellVisible = (
+  onInsert?: unknown,
+  onSelect?: unknown,
+  onDelete?: unknown,
+  onUndoDelete?: unknown,
+  onEdit?: unknown,
+  onUndoUpdate?: unknown,
+) => Boolean(onInsert || onSelect || onDelete || onUndoDelete || onEdit || onUndoUpdate);
+
+export function Table<T extends { key: string } = any>({
   data,
   pendingData,
   pendingDeleteKeys = [],
@@ -68,7 +70,7 @@ export function Table<T extends { key: string }>({
   columns,
   loading,
   error,
-  shadow,
+  shadow = 'sm',
   striped,
   className,
   onInsert,
@@ -87,8 +89,9 @@ export function Table<T extends { key: string }>({
 }: TableProps<T>) {
   const [internalInsertData, setInternalInsertData] = useState<Record<string, any>>({});
   const [internalEditData, setInternalEditData] = useState<Record<string, any>>({});
-  const visibleColumns = columns.filter(col => col.header.toLowerCase() !== 'key');
-  
+  const visibleColumns = columns.filter((col) => col.header.toLowerCase() !== 'key');
+  const showActions = actionCellVisible(onInsert, onSelect, onDelete, onUndoDelete, onEdit, onUndoUpdate);
+
   const insertData = externalInsertData || internalInsertData;
   const setInsertData = (newData: Record<string, any>) => {
     if (onInsertDataChange) {
@@ -98,8 +101,18 @@ export function Table<T extends { key: string }>({
     }
   };
 
-  if (loading) return <p className="p-8 text-center italic text-gray-500">Loading...</p>;
-  if (error) return <p className="p-8 text-center font-medium text-red-500">Error: {error.message}</p>;
+  if (loading) {
+    return (
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'center', p: 4 }}>
+        <CircularProgress size={18} />
+        <Typography color="text.secondary">Loading...</Typography>
+      </Stack>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">Error: {error.message}</Alert>;
+  }
 
   const handleInsert = () => {
     if (onInsert) {
@@ -110,7 +123,7 @@ export function Table<T extends { key: string }>({
 
   const handleStartEdit = (item: T) => {
     const initialData: Record<string, any> = {};
-    visibleColumns.forEach(col => {
+    visibleColumns.forEach((col) => {
       if (col.inputKey) {
         initialData[col.inputKey] = (item as any)[col.inputKey];
       }
@@ -126,237 +139,228 @@ export function Table<T extends { key: string }>({
   };
 
   const hasData = (data && data.length > 0) || (pendingData && pendingData.length > 0);
+  const elevation = shadow === 'none' ? 0 : shadow === 'md' ? 3 : 1;
 
   return (
-    <div className={cn(tableContainerVariants({ shadow }), className)}>
-      <table className={tableVariants({ striped })}>
-        <thead className="bg-gray-50/80 border-b border-gray-200">
-          <tr>
-            {visibleColumns.map((col, i) => (
-              <th 
-                key={i} 
-                className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600"
-              >
+    <TableContainer className={className} component={Paper} elevation={elevation}>
+      <MuiTable size="small">
+        <TableHead>
+          <TableRow>
+            {visibleColumns.map((col) => (
+              <TableCell key={col.header} sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
                 {col.header}
-              </th>
+              </TableCell>
             ))}
-            {(onInsert || onSelect || onDelete || onUndoDelete || onEdit || onUndoUpdate) && (
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 text-right">
+            {showActions && (
+              <TableCell align="right" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
                 Actions
-              </th>
+              </TableCell>
             )}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 bg-white">
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {onInsert && (
-            <tr className="bg-blue-50/30">
-              {visibleColumns.map((col, i) => (
-                <td key={i} className="px-4 py-2">
+            <TableRow sx={{ bgcolor: 'primary.50' }}>
+              {visibleColumns.map((col) => (
+                <TableCell key={col.header}>
                   {col.inputKey ? (
                     col.renderInput ? (
                       col.renderInput(
                         insertData[col.inputKey],
                         (val) => setInsertData({ ...insertData, [col.inputKey!]: val }),
-                        insertData
+                        insertData,
                       )
                     ) : (
-                      <input
-                        type="text"
-                        className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                      <TextField
+                        fullWidth
+                        onChange={(event) =>
+                          setInsertData({ ...insertData, [col.inputKey!]: event.target.value })
+                        }
                         placeholder={`Enter ${col.header.toLowerCase()}...`}
+                        size="small"
                         value={insertData[col.inputKey] || ''}
-                        onChange={(e) => setInsertData({ ...insertData, [col.inputKey!]: e.target.value })}
                       />
                     )
                   ) : (
-                    <span className="text-gray-400 italic text-xs">N/A</span>
+                    <Typography color="text.disabled" variant="caption">
+                      N/A
+                    </Typography>
                   )}
-                </td>
+                </TableCell>
               ))}
-              <td className="px-4 py-2 text-right">
-                <button
-                  onClick={handleInsert}
-                  className="px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors"
-                >
+              <TableCell align="right">
+                <Button onClick={handleInsert} size="small" variant="contained">
                   Confirm
-                </button>
-              </td>
-            </tr>
+                </Button>
+              </TableCell>
+            </TableRow>
           )}
+
           {pendingData?.map((item) => (
-            <tr key={item.key} className="bg-amber-50/50 italic border-l-4 border-l-amber-400">
-              {visibleColumns.map((col, i) => (
-                <td key={i} className="px-4 py-3 text-gray-600">
-                  {col.render(item)}
-                </td>
+            <TableRow key={item.key} sx={{ bgcolor: 'warning.50' }}>
+              {visibleColumns.map((col) => (
+                <TableCell key={col.header}>{col.render(item)}</TableCell>
               ))}
-              <td className="px-4 py-3 text-right">
-                <div className="flex justify-end items-center gap-3">
-                  <span className="text-[10px] uppercase font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded shadow-sm border border-amber-200">Pending Insert</span>
+              <TableCell align="right">
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <Chip color="warning" label="Pending Insert" size="small" variant="outlined" />
                   {onUndoInsert && (
-                    <button
-                      onClick={() => onUndoInsert(item)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors p-1"
-                      title="Undo Insertion"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                    <IconButton aria-label="Undo insertion" onClick={() => onUndoInsert(item)} size="small">
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
                   )}
-                </div>
-              </td>
-            </tr>
+                </Stack>
+              </TableCell>
+            </TableRow>
           ))}
+
           {data?.map((item) => {
             const isSelected = selectedKey === item.key;
             const isPendingDelete = pendingDeleteKeys.includes(item.key);
             const isPendingUpdate = pendingUpdateKeys.includes(item.key);
             const isEditing = editingKey === item.key;
-            
+
             return (
-              <tr 
-                key={item.key} 
-                className={cn(
-                  "transition-colors hover:bg-gray-50/50",
-                  isSelected && "bg-blue-50 hover:bg-blue-100/50",
-                  isPendingDelete && "bg-red-50/50 opacity-60 grayscale-[0.5]",
-                  isPendingUpdate && "bg-indigo-50/50 border-l-4 border-l-indigo-400",
-                  isEditing && "bg-indigo-50/30 ring-2 ring-inset ring-indigo-500/20"
-                )}
+              <TableRow
+                hover
+                key={item.key}
+                selected={isSelected || isEditing}
+                sx={{
+                  '&:nth-of-type(even)': striped ? { bgcolor: 'action.hover' } : undefined,
+                  bgcolor: isPendingDelete
+                    ? 'error.50'
+                    : isPendingUpdate
+                      ? 'info.50'
+                      : undefined,
+                  opacity: isPendingDelete ? 0.65 : 1,
+                }}
               >
-                {visibleColumns.map((col, i) => (
-                  <td key={i} className={cn("px-4 py-3 text-gray-700", isPendingDelete && "line-through")}>
+                {visibleColumns.map((col) => (
+                  <TableCell
+                    key={col.header}
+                    sx={{ textDecoration: isPendingDelete ? 'line-through' : 'none' }}
+                  >
                     {isEditing && col.inputKey ? (
                       col.renderInput ? (
                         col.renderInput(
                           internalEditData[col.inputKey],
                           (val) => setInternalEditData({ ...internalEditData, [col.inputKey!]: val }),
-                          internalEditData
+                          internalEditData,
                         )
                       ) : (
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                        <TextField
+                          fullWidth
+                          onChange={(event) =>
+                            setInternalEditData({
+                              ...internalEditData,
+                              [col.inputKey!]: event.target.value,
+                            })
+                          }
+                          size="small"
                           value={internalEditData[col.inputKey] || ''}
-                          onChange={(e) => setInternalEditData({ ...internalEditData, [col.inputKey!]: e.target.value })}
                         />
                       )
                     ) : (
                       col.render(item)
                     )}
-                  </td>
+                  </TableCell>
                 ))}
-                {(onInsert || onSelect || onDelete || onUndoDelete || onEdit || onUndoUpdate) && (
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <div className="flex justify-end items-center gap-2">
+
+                {showActions && (
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
                       {isPendingUpdate && !isEditing && (
-                        <span className="text-[10px] uppercase font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded shadow-sm border border-indigo-200">Pending Update</span>
+                        <Chip color="info" label="Pending Update" size="small" variant="outlined" />
                       )}
-                      
+
                       {onSelect && !isEditing && (
-                        <button
-                          disabled={!!editingKey}
+                        <Button
+                          disabled={Boolean(editingKey)}
                           onClick={() => onSelect(item)}
-                          className={cn(
-                            "px-3 py-1 text-xs font-medium rounded transition-colors",
-                            isSelected 
-                              ? "bg-blue-600 text-white shadow-sm" 
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200",
-                            !!editingKey && "opacity-50 cursor-not-allowed grayscale"
-                          )}
+                          size="small"
+                          variant={isSelected ? 'contained' : 'outlined'}
                         >
                           {isSelected ? 'Selected' : 'Select'}
-                        </button>
+                        </Button>
                       )}
-                      
+
                       {isEditing ? (
                         <>
-                          <button
-                            onClick={() => handleSaveEdit(item)}
-                            className="px-3 py-1 text-xs font-medium rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
-                          >
+                          <Button onClick={() => handleSaveEdit(item)} size="small" variant="contained">
                             Save
-                          </button>
-                          <button
-                            onClick={onCancelEdit}
-                            className="px-3 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors border border-gray-200"
-                          >
+                          </Button>
+                          <Button color="inherit" onClick={onCancelEdit} size="small" variant="outlined">
                             Cancel
-                          </button>
+                          </Button>
                         </>
                       ) : (
                         <>
                           {onEdit && !isPendingDelete && !isPendingUpdate && (
-                            <button
-                              disabled={!!editingKey}
+                            <Button
+                              disabled={Boolean(editingKey)}
                               onClick={() => handleStartEdit(item)}
-                              className={cn(
-                                "px-3 py-1 text-xs font-medium rounded bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 transition-colors shadow-sm",
-                                !!editingKey && "opacity-50 cursor-not-allowed grayscale"
-                              )}
+                              size="small"
+                              variant="outlined"
                             >
                               Edit
-                            </button>
+                            </Button>
                           )}
-                          
-                          {isPendingUpdate ? (
-                            onUndoUpdate && (
-                              <button
-                                disabled={!!editingKey}
-                                onClick={() => onUndoUpdate(item)}
-                                className={cn(
-                                  "px-3 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors border border-gray-200",
-                                  !!editingKey && "opacity-50 cursor-not-allowed"
+
+                          {isPendingUpdate
+                            ? onUndoUpdate && (
+                                <Button
+                                  color="inherit"
+                                  disabled={Boolean(editingKey)}
+                                  onClick={() => onUndoUpdate(item)}
+                                  size="small"
+                                  variant="outlined"
+                                >
+                                  Undo
+                                </Button>
+                              )
+                            : isPendingDelete
+                              ? onUndoDelete && (
+                                  <Button
+                                    color="inherit"
+                                    disabled={Boolean(editingKey)}
+                                    onClick={() => onUndoDelete(item)}
+                                    size="small"
+                                    variant="outlined"
+                                  >
+                                    Undo
+                                  </Button>
+                                )
+                              : onDelete && (
+                                  <Button
+                                    color="error"
+                                    disabled={Boolean(editingKey)}
+                                    onClick={() => onDelete(item)}
+                                    size="small"
+                                    variant="outlined"
+                                  >
+                                    Delete
+                                  </Button>
                                 )}
-                              >
-                                Undo
-                              </button>
-                            )
-                          ) : isPendingDelete ? (
-                            onUndoDelete && (
-                              <button
-                                disabled={!!editingKey}
-                                onClick={() => onUndoDelete(item)}
-                                className={cn(
-                                  "px-3 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors border border-gray-200",
-                                  !!editingKey && "opacity-50 cursor-not-allowed"
-                                )}
-                              >
-                                Undo
-                              </button>
-                            )
-                          ) : (
-                            onDelete && (
-                              <button
-                                disabled={!!editingKey}
-                                onClick={() => onDelete(item)}
-                                className={cn(
-                                  "px-3 py-1 text-xs font-medium rounded bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 transition-colors shadow-sm",
-                                  !!editingKey && "opacity-50 cursor-not-allowed grayscale"
-                                )}
-                              >
-                                Delete
-                              </button>
-                            )
-                          )}
                         </>
                       )}
-                    </div>
-                  </td>
+                    </Stack>
+                  </TableCell>
                 )}
-              </tr>
+              </TableRow>
             );
           })}
+
           {!hasData && !onInsert && (
-            <tr>
-              <td colSpan={visibleColumns.length + (onSelect || onDelete || onUndoDelete || onEdit || onUndoUpdate ? 1 : 0)} className="p-8 text-center italic text-gray-500">
-                No data found.
-              </td>
-            </tr>
+            <TableRow>
+              <TableCell align="center" colSpan={visibleColumns.length + (showActions ? 1 : 0)}>
+                <Box sx={{ color: 'text.secondary', fontStyle: 'italic', p: 3 }}>
+                  No data found.
+                </Box>
+              </TableCell>
+            </TableRow>
           )}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </MuiTable>
+    </TableContainer>
   );
 }

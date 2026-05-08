@@ -71,7 +71,7 @@ Different application pages. Very simple calls to functions / variables in other
 
 #### Components
 
-Reusable React components, e.g. Table, List, Button, etc.
+Wrappers around `MUI` components for specific purposes.
 
 #### Features
 

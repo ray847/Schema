@@ -1,4 +1,15 @@
 import { useState, type FormEvent } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useAuth } from './useAuth';
 
 type AuthMode = 'login' | 'register';
@@ -34,80 +45,72 @@ export function AuthView({ compact = false }: AuthViewProps) {
   };
 
   const content = (
-    <section className="auth-panel" aria-labelledby="auth-title">
-        <div className="auth-heading">
-          <p className="eyebrow">Schema Access</p>
-          <h1 id="auth-title">
+    <Paper aria-labelledby="auth-title" component="section" elevation={3} sx={{ maxWidth: 460, p: 4, width: 1 }}>
+      <Stack spacing={3}>
+        <Box>
+          <Typography color="text.secondary" sx={{ fontWeight: 800, letterSpacing: 1.2 }} variant="overline">
+            Schema Access
+          </Typography>
+          <Typography id="auth-title" variant="h4">
             {mode === 'register' ? 'Create your account' : 'Sign in'}
-          </h1>
-          <p>
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }} variant="body2">
             The database console is available to admin users. The first
             registered account becomes admin automatically.
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="auth-tabs" role="tablist" aria-label="Auth mode">
-          <button
-            className={mode === 'login' ? 'active' : ''}
-            onClick={() => {
-              setMode('login');
-              setError(null);
-            }}
-            type="button"
-          >
-            Sign in
-          </button>
-          <button
-            className={mode === 'register' ? 'active' : ''}
-            onClick={() => {
-              setMode('register');
-              setError(null);
-            }}
-            type="button"
-          >
-            Register
-          </button>
-        </div>
+        <Tabs
+          aria-label="Auth mode"
+          onChange={(_event, value: AuthMode) => {
+            setMode(value);
+            setError(null);
+          }}
+          value={mode}
+          variant="fullWidth"
+        >
+          <Tab label="Sign in" value="login" />
+          <Tab label="Register" value="register" />
+        </Tabs>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            Email
-            <input
-              autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              type="email"
-              value={email}
-            />
-          </label>
+        <Stack component="form" onSubmit={handleSubmit} spacing={2}>
+          <TextField
+            autoComplete="email"
+            label="Email"
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            type="email"
+            value={email}
+          />
 
-          <label>
-            Password
-            <input
-              autoComplete={
-                mode === 'register' ? 'new-password' : 'current-password'
-              }
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
-          </label>
+          <TextField
+            autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+            label="Password"
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            type="password"
+            value={password}
+          />
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && <Alert severity="error">{error}</Alert>}
 
-          <button className="primary-action" disabled={submitting} type="submit">
+          <Button disabled={submitting} type="submit" variant="contained">
             {submitting
               ? 'Working...'
               : mode === 'register'
                 ? 'Create account'
                 : 'Sign in'}
-          </button>
-        </form>
-      </section>
+          </Button>
+        </Stack>
+      </Stack>
+    </Paper>
   );
 
   if (compact) return content;
 
-  return <main className="auth-page">{content}</main>;
+  return (
+    <Box component="main" sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100svh', p: 2 }}>
+      {content}
+    </Box>
+  );
 }

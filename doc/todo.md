@@ -5,6 +5,7 @@
 * ~~Add table editing.~~
 * ~~Implement user & preference system.~~
 * Frontend refactor
+  * Use mui data grid for tables in replacement for the current one
 * NL2SQL
 * Routing functionality
 
