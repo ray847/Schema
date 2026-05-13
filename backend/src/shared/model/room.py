@@ -25,6 +25,7 @@ class RoomBase(pydantic.BaseModel):
     name: str
     room_type: RoomType
     capacity: int
+    floor: int = 1
     facility: Facility
     building_key: Key[Literal["Building"]]
 

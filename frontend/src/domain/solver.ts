@@ -1,4 +1,4 @@
-import { Interval, PreferenceModel, RoomModel, Time } from "../shared";
+import { BuildingEdgeModel, Interval, PreferenceModel, RoomModel, Time } from "../shared";
 import { Task } from "./task";
 import { Score, Scorer } from "./scorer";
 import { zip, range } from "remeda";
@@ -19,8 +19,14 @@ export async function solve(
   rooms: RoomModel[][],
   intervals: Interval[][],
   preferences: PreferenceModel[],
+  buildingEdges: BuildingEdgeModel[] = [],
 ): Promise<Solution | null> {
-  const solver = new Solver(tasks, rooms, intervals, new Scorer(preferences));
+  const solver = new Solver(
+    tasks,
+    rooms,
+    intervals,
+    new Scorer(preferences, buildingEdges),
+  );
   return solver.solve();
 }
 
@@ -187,6 +193,7 @@ class Solver {
         let to = this.rooms[taskSeq[i + 1]][roomSeq[i + 1]];
         travelScore += this.scorer.scoreTravel(from, to);
       }
+      if (!Number.isFinite(travelScore)) return;
       const routeScore = this.scorer.scoreRoute(roomScore, travelScore);
       if (this.bestSolution == null || routeScore > this.bestSolution.score)
         this.bestSolution = {

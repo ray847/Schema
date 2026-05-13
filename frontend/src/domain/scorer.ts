@@ -1,4 +1,4 @@
-import { PreferenceModel, RoomModel } from "../shared";
+import { BuildingEdgeModel, PreferenceModel, RoomModel } from "../shared";
 import {
   Constraint,
   RoomTypeNegConstraint,
@@ -8,6 +8,8 @@ import {
 export type Score = number;
 
 export class Scorer {
+  readonly graph: number[][];
+  readonly buildingKeyToIndex: Map<string, number>;
   readonly weights: {
     type: number,
     preference: number,
@@ -21,10 +23,17 @@ export class Scorer {
       room: 1.0,
       travel: 1.0,
     };
+  readonly floorTravelSeconds = 30;
   preferences!: PreferenceModel[];
 
-  constructor(preferences: PreferenceModel[]) {
+  constructor(
+    preferences: PreferenceModel[],
+    buildingEdges: BuildingEdgeModel[] = [],
+  ) {
     this.preferences = preferences;
+    const { graph, buildingKeyToIndex } = this.buildDistanceGraph(buildingEdges);
+    this.graph = graph;
+    this.buildingKeyToIndex = buildingKeyToIndex;
   }
 
   scoreRoom(room: RoomModel, constraint: Constraint): Score {
@@ -54,12 +63,105 @@ export class Scorer {
       this.weights.preference * preferenceScore;
   }
 
-  scoreTravel(_room1: RoomModel, _room2: RoomModel): Score {
-    return 1.0;
+  scoreTravel(room1: RoomModel, room2: RoomModel): Score {
+    const buildingTravelSeconds = this.travelSeconds(
+      room1.buildingKey,
+      room2.buildingKey,
+    );
+    const travelSeconds = buildingTravelSeconds +
+      this.floorTransitionSeconds(room1, room2);
+
+    if (!Number.isFinite(travelSeconds)) return Number.NEGATIVE_INFINITY;
+    return -travelSeconds / 60;
   }
 
   scoreRoute(roomScore: Score, travelScore: Score): Score {
     return this.weights.room * roomScore + this.weights.travel * travelScore;
+  }
+
+  private travelSeconds(fromBuildingKey: string, toBuildingKey: string): number {
+    if (String(fromBuildingKey) === String(toBuildingKey)) return 0;
+
+    const fromIdx = this.buildingKeyToIndex.get(String(fromBuildingKey));
+    const toIdx = this.buildingKeyToIndex.get(String(toBuildingKey));
+    if (fromIdx == null || toIdx == null) return Number.POSITIVE_INFINITY;
+
+    return this.graph[fromIdx][toIdx];
+  }
+
+  private floorTransitionSeconds(room1: RoomModel, room2: RoomModel): number {
+    const floor1 = room1.floor ?? 1;
+    const floor2 = room2.floor ?? 1;
+    const floorDelta = String(room1.buildingKey) === String(room2.buildingKey)
+      ? Math.abs(floor1 - floor2)
+      : Math.abs(floor1 - 1) + Math.abs(floor2 - 1);
+
+    return floorDelta * this.floorTravelSeconds;
+  }
+
+  private buildDistanceGraph(
+    buildingEdges: BuildingEdgeModel[],
+  ): {
+    graph: number[][];
+    buildingKeyToIndex: Map<string, number>;
+  } {
+    const buildingKeyToIndex = new Map<string, number>();
+
+    const ensureNode = (key: string) => {
+      if (!buildingKeyToIndex.has(key)) {
+        buildingKeyToIndex.set(key, buildingKeyToIndex.size);
+      }
+    };
+
+    for (const edge of buildingEdges) {
+      ensureNode(String(edge.fromBuildingKey));
+      ensureNode(String(edge.toBuildingKey));
+    }
+
+    const graph = Array.from(
+      { length: buildingKeyToIndex.size },
+      (_, row) => Array.from(
+        { length: buildingKeyToIndex.size },
+        (_, col) => row === col ? 0 : Number.POSITIVE_INFINITY,
+      ),
+    );
+
+    const setDistance = (from: string, to: string, distance: number) => {
+      const fromIdx = buildingKeyToIndex.get(from);
+      const toIdx = buildingKeyToIndex.get(to);
+      if (fromIdx == null || toIdx == null) return;
+      if (distance < graph[fromIdx][toIdx]) graph[fromIdx][toIdx] = distance;
+    };
+
+    for (const edge of buildingEdges) {
+      const from = String(edge.fromBuildingKey);
+      const to = String(edge.toBuildingKey);
+      const walkTime = edge.walkTimeSeconds;
+      setDistance(from, to, walkTime);
+      if (edge.bidirectional) setDistance(to, from, walkTime);
+    }
+
+    this.runFloydWarshall(graph);
+    return { graph, buildingKeyToIndex };
+  }
+
+  private runFloydWarshall(graph: number[][]) {
+    for (let via = 0; via < graph.length; via++) {
+      for (let from = 0; from < graph.length; from++) {
+        const fromVia = graph[from][via];
+        if (!Number.isFinite(fromVia)) continue;
+
+        for (let to = 0; to < graph.length; to++) {
+          const viaTo = graph[via][to];
+          if (!Number.isFinite(viaTo)) continue;
+
+          const candidate = fromVia + viaTo;
+          if (candidate < graph[from][to]) {
+            graph[from][to] = candidate;
+          }
+        }
+      }
+    }
   }
 
 };

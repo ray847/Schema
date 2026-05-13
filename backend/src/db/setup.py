@@ -95,18 +95,51 @@ VALUES (?, ?, ?, ?)""",
         (2, "Business Center", "academic", "East Side"),
     )
 
+    # BuildingEdge
+    execute_logged(
+        conn,
+        "INSERT",
+        """
+INSERT INTO BuildingEdge (
+    from_building_key,
+    to_building_key,
+    walk_time_seconds,
+    distance_meters,
+    edge_type,
+    bidirectional
+)
+VALUES (?, ?, ?, ?, ?, ?)""",
+        (1, 2, 240, 300.0, "walkway", True),
+    )
+    execute_logged(
+        conn,
+        "INSERT",
+        """
+INSERT INTO BuildingEdge (
+    from_building_key,
+    to_building_key,
+    walk_time_seconds,
+    distance_meters,
+    edge_type,
+    bidirectional
+)
+VALUES (?, ?, ?, ?, ?, ?)""",
+        (2, 3, 600, 750.0, "walkway", True),
+    )
+
     # Room
     execute_logged(
         conn,
         "INSERT",
         """
-INSERT INTO Room (building_key, name, room_type, capacity, facility)
-VALUES (?, ?, ?, ?, ?)""",
+INSERT INTO Room (building_key, name, room_type, capacity, floor, facility)
+VALUES (?, ?, ?, ?, ?, ?)""",
         (
             1,
             "101",
             "lecture",
             50,
+            1,
             Facility(power_outlet=1.0).model_dump_json(),
         ),
     )
@@ -114,21 +147,22 @@ VALUES (?, ?, ?, ?, ?)""",
         conn,
         "INSERT",
         """
-INSERT INTO Room (building_key, name, room_type, capacity)
-VALUES (?, ?, ?, ?)""",
-        (1, "102", "laboratory", 30),
+INSERT INTO Room (building_key, name, room_type, capacity, floor)
+VALUES (?, ?, ?, ?, ?)""",
+        (1, "102", "laboratory", 30, 2),
     )
     execute_logged(
         conn,
         "INSERT",
         """
-INSERT INTO Room (building_key, name, room_type, capacity, facility)
-VALUES (?, ?, ?, ?, ?)""",
+INSERT INTO Room (building_key, name, room_type, capacity, floor, facility)
+VALUES (?, ?, ?, ?, ?, ?)""",
         (
             2,
             "Reading Room",
             "lecture",
             100,
+            1,
             Facility(power_outlet=0.5).model_dump_json(),
         ),
     )
@@ -136,9 +170,9 @@ VALUES (?, ?, ?, ?, ?)""",
         conn,
         "INSERT",
         """
-INSERT INTO Room (building_key, name, room_type, capacity, facility)
-VALUES (?, ?, ?, ?, ?)""",
-        (3, "201", "office", 10, Facility(power_outlet=15.0).model_dump_json()),
+INSERT INTO Room (building_key, name, room_type, capacity, floor, facility)
+VALUES (?, ?, ?, ?, ?, ?)""",
+        (3, "201", "office", 10, 2, Facility(power_outlet=15.0).model_dump_json()),
     )
 
     # Person

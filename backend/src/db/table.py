@@ -2,8 +2,10 @@ import datetime
 from typing import Optional, Type, Any, get_origin, get_args, Union
 from pydantic import BaseModel
 import shared as shared
-from shared import key
 from shared.log import log
+
+
+ForeignKeySpec = Type[BaseModel] | tuple[str, Type[BaseModel]]
 
 
 def model_table_name(model: Type[BaseModel]) -> str:
@@ -22,13 +24,17 @@ class Table:
         self,
         primary_model: Optional[Type[BaseModel]] = None,
         name: Optional[str] = None,
-        foreign_models: Optional[tuple[Type[BaseModel], ...]] = None,
+        foreign_models: Optional[tuple[ForeignKeySpec, ...]] = None,
         primary_keys: Optional[tuple[str, ...]] = None,
         attr: dict[str, str] = {},
         constraints: list[str] = [],
     ):
         self.primary_model = primary_model
-        self.name = model_table_name(primary_model) if primary_model else name
+        self.name = (
+            name if name is not None
+            else model_table_name(primary_model) if primary_model
+            else None
+        )
         self.primary_keys = primary_keys
 
         # Pydantic v2 compatibility
@@ -66,10 +72,9 @@ class Table:
                 col_defs.append(col)
 
         # Handle Foreign Keys
-        for foreign_model in self.foreign_models:
+        for foreign_key in self.foreign_models:
+            fk_col_name, foreign_model = self._foreign_key_parts(foreign_key)
             fk_table_name = model_table_name(foreign_model)
-            # or whatever shared.Key[foreign_model].name outputs
-            fk_col_name = f"{fk_table_name}_key"
 
             # If the column wasn't naturally in the model, inject it (Fallback)
             if not any(c.startswith(fk_col_name) for c in col_defs):
@@ -77,8 +82,8 @@ class Table:
 
             # Append the foreign key constraint.
             col_defs.append(
-                f"FOREIGN KEY ({fk_col_name}) REFERENCES {
-                    fk_table_name}(key) ON DELETE CASCADE"
+                f"FOREIGN KEY ({fk_col_name}) "
+                f"REFERENCES {fk_table_name}(key) ON DELETE CASCADE"
             )
 
         if self.primary_keys:
@@ -91,6 +96,16 @@ class Table:
         )
         log("CREATE", "Generated SQL command", sql=sql, arguments=())
         return sql
+
+    @staticmethod
+    def _foreign_key_parts(
+        foreign_key: ForeignKeySpec,
+    ) -> tuple[str, Type[BaseModel]]:
+        if isinstance(foreign_key, tuple):
+            return foreign_key
+
+        fk_table_name = model_table_name(foreign_key)
+        return f"{fk_table_name}_key", foreign_key
 
     @staticmethod
     def _python_to_sqlite(py_type: Any) -> str:

@@ -1,10 +1,10 @@
 import type { CurrentUser } from '../api/authentication';
-import { PreferenceView } from '../features/preference';
+import { UserPage } from './UserPage';
 
 interface PreferencesPageProps {
   currentUser: CurrentUser | null;
 }
 
 export function PreferencesPage({ currentUser }: PreferencesPageProps) {
-  return <PreferenceView currentUser={currentUser} />;
+  return <UserPage currentUser={currentUser} />;
 }

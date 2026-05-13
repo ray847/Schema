@@ -3,6 +3,7 @@ import strawberry
 from strawberry.scalars import JSON
 from shared.model.campus import CampusInput
 from shared.model.building import BuildingInput
+from shared.model.building_edge import BuildingEdgeInput
 from shared.model.room import RoomInput
 from shared.model.person import PersonInput
 from shared.model.course import CourseInput
@@ -76,6 +77,18 @@ class Mutation:
     ) -> None:
         require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.BUILDING).append(
+            [input.to_pydantic() for input in inputs]
+        )
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def create_building_edge(
+        self,
+        inputs: list[BuildingEdgeInput],
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        require_admin(info.context.current_user)
+        view = db.View(db.TableRegistry.BUILDING_EDGE).append(
             [input.to_pydantic() for input in inputs]
         )
         _ = await info.context.db_context.execute(view)
@@ -179,6 +192,24 @@ class Mutation:
         }
         view = db.View(db.TableRegistry.BUILDING).replace(
             Key[Literal["Building"]](key), filtered
+        )
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def update_building_edge(
+        self,
+        key: strawberry.ID,
+        replacements: JSON,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        require_admin(info.context.current_user)
+        model = db.TableRegistry.BUILDING_EDGE.value.primary_model
+        data = replacements if isinstance(replacements, dict) else {}
+        filtered = {
+            k: v for k, v in data.items() if k in getattr(model, "model_fields")
+        }
+        view = db.View(db.TableRegistry.BUILDING_EDGE).replace(
+            Key[Literal["BuildingEdge"]](key), filtered
         )
         _ = await info.context.db_context.execute(view)
 
@@ -329,6 +360,18 @@ class Mutation:
         require_admin(info.context.current_user)
         view = db.View(db.TableRegistry.BUILDING).pop(
             Key[Literal["Building"]](key)
+        )
+        _ = await info.context.db_context.execute(view)
+
+    @strawberry.field
+    async def delete_building_edge(
+        self,
+        key: strawberry.ID,
+        info: strawberry.Info[ExecutionContext],
+    ) -> None:
+        require_admin(info.context.current_user)
+        view = db.View(db.TableRegistry.BUILDING_EDGE).pop(
+            Key[Literal["BuildingEdge"]](key)
         )
         _ = await info.context.db_context.execute(view)
 

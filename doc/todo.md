@@ -12,6 +12,7 @@
 ## Quality of Life
 
 * Paged quering for console view.
+* User presets / template for tasks
 
 ## Bug
 

@@ -14,11 +14,33 @@ class TableRegistry(enum.Enum):
         foreign_models=(shared.model.CampusResponse,),
         attr={"name": "NOT NULL"},
     )
+    BUILDING_EDGE = Table(
+        primary_model=shared.model.BuildingEdgeResponse,
+        name="BuildingEdge",
+        foreign_models=(
+            ("from_building_key", shared.model.BuildingResponse),
+            ("to_building_key", shared.model.BuildingResponse),
+        ),
+        attr={
+            "from_building_key": "NOT NULL",
+            "to_building_key": "NOT NULL",
+            "walk_time_seconds": "NOT NULL",
+            "edge_type": "NOT NULL DEFAULT 'walkway'",
+            "bidirectional": "NOT NULL DEFAULT 1",
+        },
+        constraints=[
+            "CHECK (from_building_key <> to_building_key)",
+            "CHECK (walk_time_seconds > 0)",
+            "CHECK (distance_meters IS NULL OR distance_meters >= 0)",
+            "UNIQUE (from_building_key, to_building_key, edge_type)",
+        ],
+    )
     ROOM = Table(
         primary_model=shared.model.RoomResponse,
         foreign_models=(shared.model.BuildingResponse,),
         attr={
             "name": "NOT NULL",
+            "floor": "NOT NULL DEFAULT 1",
             "facility": f"DEFAULT '{Facility(power_outlet=0.0).model_dump_json()}'",
         },
         constraints=["CHECK (capacity > 0)"],

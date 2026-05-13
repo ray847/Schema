@@ -2,6 +2,7 @@ import json
 import strawberry
 from shared.model.campus import CampusModel
 from shared.model.building import BuildingModel
+from shared.model.building_edge import BuildingEdgeModel
 from shared.model.room import RoomModel
 from shared.model.person import PersonModel
 from shared.model.course import CourseModel
@@ -47,6 +48,25 @@ class Query:
         ]
 
     @strawberry.field
+    async def list_building_edge(
+        self, info: strawberry.Info[ExecutionContext]
+    ) -> list[BuildingEdgeModel]:
+        view = db.View(db.TableRegistry.BUILDING_EDGE)
+        res = await info.context.db_context.execute(view)
+        return [
+            BuildingEdgeModel(
+                key=row["key"],
+                from_building_key=row["from_building_key"],
+                to_building_key=row["to_building_key"],
+                walk_time_seconds=row["walk_time_seconds"],
+                distance_meters=row["distance_meters"],
+                edge_type=row["edge_type"],
+                bidirectional=bool(row["bidirectional"]),
+            )
+            for row in res  # type: ignore
+        ]
+
+    @strawberry.field
     async def list_room(
         self, info: strawberry.Info[ExecutionContext]
     ) -> list[RoomModel]:
@@ -58,6 +78,7 @@ class Query:
                 name=row["name"],
                 room_type=row["room_type"],
                 capacity=row["capacity"],
+                floor=row["floor"],
                 facility=json.loads(row["facility"]),
                 building_key=row["building_key"],
             )

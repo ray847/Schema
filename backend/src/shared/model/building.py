@@ -67,6 +67,7 @@ class BuildingModel:
                 name=row["name"],
                 room_type=row["room_type"],
                 capacity=row["capacity"],
+                floor=row["floor"],
                 facility=json.loads(row["facility"]),
                 building_key=row["building_key"],
             )

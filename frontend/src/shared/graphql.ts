@@ -44,6 +44,36 @@ export type AllocationModel = {
   startTime: Scalars['DateTime']['output'];
 };
 
+export type BuildingEdgeInput = {
+  bidirectional?: Scalars['Boolean']['input'];
+  distanceMeters?: InputMaybe<Scalars['Float']['input']>;
+  edgeType?: BuildingEdgeType;
+  fromBuildingKey: Scalars['ID']['input'];
+  toBuildingKey: Scalars['ID']['input'];
+  walkTimeSeconds: Scalars['Int']['input'];
+};
+
+export type BuildingEdgeModel = {
+  __typename?: 'BuildingEdgeModel';
+  bidirectional: Scalars['Boolean']['output'];
+  distanceMeters?: Maybe<Scalars['Float']['output']>;
+  edgeType: BuildingEdgeType;
+  fromBuilding: BuildingModel;
+  fromBuildingKey: Scalars['ID']['output'];
+  key: Scalars['ID']['output'];
+  toBuilding: BuildingModel;
+  toBuildingKey: Scalars['ID']['output'];
+  walkTimeSeconds: Scalars['Int']['output'];
+};
+
+export enum BuildingEdgeType {
+  Indoor = 'INDOOR',
+  Other = 'OTHER',
+  Shuttle = 'SHUTTLE',
+  Stairs = 'STAIRS',
+  Walkway = 'WALKWAY'
+}
+
 export type BuildingInput = {
   buildingType: BuildingType;
   campusKey: Scalars['ID']['input'];
@@ -119,6 +149,7 @@ export type Mutation = {
   createActivity?: Maybe<Scalars['Void']['output']>;
   createAllocation?: Maybe<Scalars['Void']['output']>;
   createBuilding?: Maybe<Scalars['Void']['output']>;
+  createBuildingEdge?: Maybe<Scalars['Void']['output']>;
   createCampus?: Maybe<Scalars['Void']['output']>;
   createCourse?: Maybe<Scalars['Void']['output']>;
   createCourseTeacher?: Maybe<Scalars['Void']['output']>;
@@ -128,6 +159,7 @@ export type Mutation = {
   deleteActivity?: Maybe<Scalars['Void']['output']>;
   deleteAllocation?: Maybe<Scalars['Void']['output']>;
   deleteBuilding?: Maybe<Scalars['Void']['output']>;
+  deleteBuildingEdge?: Maybe<Scalars['Void']['output']>;
   deleteCampus?: Maybe<Scalars['Void']['output']>;
   deleteCourse?: Maybe<Scalars['Void']['output']>;
   deleteCourseTeacher?: Maybe<Scalars['Void']['output']>;
@@ -137,6 +169,7 @@ export type Mutation = {
   updateActivity?: Maybe<Scalars['Void']['output']>;
   updateAllocation?: Maybe<Scalars['Void']['output']>;
   updateBuilding?: Maybe<Scalars['Void']['output']>;
+  updateBuildingEdge?: Maybe<Scalars['Void']['output']>;
   updateCampus?: Maybe<Scalars['Void']['output']>;
   updateCourse?: Maybe<Scalars['Void']['output']>;
   updateCourseTeacher?: Maybe<Scalars['Void']['output']>;
@@ -158,6 +191,11 @@ export type MutationCreateAllocationArgs = {
 
 export type MutationCreateBuildingArgs = {
   inputs: Array<BuildingInput>;
+};
+
+
+export type MutationCreateBuildingEdgeArgs = {
+  inputs: Array<BuildingEdgeInput>;
 };
 
 
@@ -207,6 +245,11 @@ export type MutationDeleteBuildingArgs = {
 };
 
 
+export type MutationDeleteBuildingEdgeArgs = {
+  key: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteCampusArgs = {
   key: Scalars['ID']['input'];
 };
@@ -252,6 +295,12 @@ export type MutationUpdateAllocationArgs = {
 
 
 export type MutationUpdateBuildingArgs = {
+  key: Scalars['ID']['input'];
+  replacements: Scalars['JSON']['input'];
+};
+
+
+export type MutationUpdateBuildingEdgeArgs = {
   key: Scalars['ID']['input'];
   replacements: Scalars['JSON']['input'];
 };
@@ -329,6 +378,7 @@ export type Query = {
   listActivity: Array<ActivityModel>;
   listAllocation: Array<AllocationModel>;
   listBuilding: Array<BuildingModel>;
+  listBuildingEdge: Array<BuildingEdgeModel>;
   listCampus: Array<CampusModel>;
   listCourse: Array<CourseModel>;
   listCourseTeacher: Array<CourseTeacherModel>;
@@ -346,6 +396,7 @@ export type RoomInput = {
   buildingKey: Scalars['ID']['input'];
   capacity: Scalars['Int']['input'];
   facility: Scalars['JSON']['input'];
+  floor?: Scalars['Int']['input'];
   name: Scalars['String']['input'];
   roomType: RoomType;
 };
@@ -356,6 +407,7 @@ export type RoomModel = {
   buildingKey: Scalars['ID']['output'];
   capacity: Scalars['Int']['output'];
   facility: Scalars['JSON']['output'];
+  floor: Scalars['Int']['output'];
   key: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   roomType: RoomType;

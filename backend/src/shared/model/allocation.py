@@ -55,6 +55,7 @@ class AllocationModel:
             name=res["name"],
             room_type=res["room_type"],
             capacity=res["capacity"],
+            floor=res["floor"],
             facility=json.loads(res["facility"]),
             building_key=res["building_key"],
         )

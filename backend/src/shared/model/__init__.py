@@ -5,6 +5,13 @@ from .building import (
     BuildingModel,
     BuildingInput,
 )
+from .building_edge import (
+    BuildingEdgeCreate,
+    BuildingEdgeResponse,
+    BuildingEdgeModel,
+    BuildingEdgeInput,
+    BuildingEdgeType,
+)
 from .room import RoomCreate, RoomResponse, RoomModel, RoomInput
 from .person import PersonCreate, PersonResponse, PersonModel, PersonInput
 from .course import CourseCreate, CourseResponse, CourseModel, CourseInput
@@ -41,6 +48,11 @@ __all__ = [
     "BuildingResponse",
     "BuildingModel",
     "BuildingInput",
+    "BuildingEdgeCreate",
+    "BuildingEdgeResponse",
+    "BuildingEdgeModel",
+    "BuildingEdgeInput",
+    "BuildingEdgeType",
     "RoomCreate",
     "RoomResponse",
     "RoomModel",
