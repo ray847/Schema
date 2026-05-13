@@ -1,0 +1,59 @@
+direction: down
+
+classes: {
+  entry: {
+    style: {
+      border-radius: 1000
+      double-border: true
+    }
+    # near: top-center
+  }
+  exit: {
+    style: {
+      border-radius: 1000
+      double-border: true
+    }
+    # near: bottom-center
+  }
+  conditional: {
+    shape: diamond
+  }
+  process: {
+    shape: parallelogram
+  }
+}
+
+task prefix -> feasibility check
+feasibility check -> null: not possible
+feasibility check -> evaluate route
+evaluate route -> compare with best: possible
+compare with best -> update best route: better
+compare with best -> add one task: worse or equal
+update best route -> add one task
+add one task -> longer task prefix
+longer task prefix -> task prefix: recursion
+
+preprocess: {
+  near: top-center
+  shape: rectangle
+
+  fetch -> precompute
+
+  fetch: fetch rooms & graph {
+    class: process
+  }
+  precompute: best fitting room starting from t {
+    class: process
+  }
+}
+
+task prefix.class: entry
+feasibility check.class: conditional
+evaluate route: evaluate route {
+  class: process
+}
+compare with best.class: conditional
+update best route.class: process
+add one task.class: process
+longer task prefix.class: exit
+null.class: exit

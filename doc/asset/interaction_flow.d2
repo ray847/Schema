@@ -1,11 +1,11 @@
 direction: right
 
-Basic Query {
+Basic Query: {
   style.fill: white
 
-  User --> NL2SQL
-  NL2SQL --> DB
-  DB --> User
+  User -> NL2SQL
+  NL2SQL -> DB
+  DB -> User
 
   User: {
     shape: person
@@ -18,25 +18,24 @@ Basic Query {
   DB: {
     shape: cylinder
   }
-
 }
 
 Planning Query: {
   style.fill: white
 
-  User <--> NL2Task
-  NL2Task --> Task List
-  User <--> Task List: {
+  User <-> NL2Task
+  NL2Task -> Task List
+  User <-> Task List: {
     label: light adjustments
     style.stroke-dash: 3
   }
-  DB --> Allocation
-  Task List --> Planner
-  Task List --> DB
-  Allocation --> Planner
-  User --> Preference
-  Preference --> Planner
-  Route <--> Planner: {
+  DB -> Allocation
+  Task List -> Planner
+  Task List -> DB
+  Allocation -> Planner
+  DB -> Preference
+  Preference -> Planner
+  Route <-> Planner: {
     source-arrowhead: {
       shape: triangle
     }
@@ -44,7 +43,7 @@ Planning Query: {
       shape: none
     }
   }
-  User <--> Route: {
+  User <-> Route: {
     source-arrowhead: {
       shape: triangle
     }
@@ -87,5 +86,4 @@ Planning Query: {
   Planner: {
     shape: parallelogram
   }
-
 }

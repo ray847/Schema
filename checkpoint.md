@@ -20,8 +20,8 @@
 
 ## Checkpoint 4: 数据库实现 (5/14)
 
-  * 建表 SQL：由代码实现：[`backend/src/shared/model/*.py`](backend/src/model/*.py), [`backend/src/db/table.py`](backend/src/db/table.py)
-  * 约束实现方案：由代码实现
+  * 建表 SQL：由代码实现：[`doc/sql_commands.md`](doc/sql_commands.md), [`backend/src/shared/model/`](backend/src/model/*.py), [`backend/src/db/table.py`](backend/src/db/table.py)
+  * 查询，修改 SQL：由代码实现：[`doc/sql_commands.md`](doc/sql_commands.md), [`backend/src/db/view.py`](backend/src/db/view.py)
   * 索引设计：[`doc/database_design.md`](doc/database_design.md)
   * 初始测试数据：待完成
 

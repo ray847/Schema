@@ -1,11 +1,9 @@
+import { Constraint } from "./constraint"
+
 export class Task {
   name!: string
-  tags!: TaskTag[]
+  constraint!: Constraint
 };
-
-export interface TaskTag {
-  name: string
-}
 
 export type TaskStatus = 'draft' | 'ready' | 'solving' | 'solved';
 
