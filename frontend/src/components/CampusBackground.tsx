@@ -6,6 +6,7 @@ import type { CampusModel, BuildingModel } from '../shared';
 interface CampusBackgroundProps {
   align?: 'center' | 'right';
   campus?: CampusModel | null;
+  colorMode?: 'light' | 'dark';
   focus?: 'center' | 'top';
   highlightColor?: string;
   highlightedBuildingKeys?: string[];
@@ -100,6 +101,7 @@ function CampusCamera({
 function CampusScene({
   align,
   campus,
+  colorMode = 'light',
   focus,
   highlightColor = '#2563eb',
   highlightedBuildingKeys = [],
@@ -110,14 +112,15 @@ function CampusScene({
     () => new Set(highlightedBuildingKeys.map(String)),
     [highlightedBuildingKeys],
   );
+  const dark = colorMode === 'dark';
 
   return (
     <>
-      <color attach="background" args={['#eef6f3']} />
-      <ambientLight intensity={0.95} />
+      <color attach="background" args={[dark ? '#101318' : '#f7f8f7']} />
+      <ambientLight intensity={dark ? 0.55 : 0.95} />
       <directionalLight
         castShadow
-        intensity={2.1}
+        intensity={dark ? 1.55 : 2.1}
         position={[12, 18, 8]}
         shadow-camera-bottom={-45}
         shadow-camera-left={-45}
@@ -126,13 +129,13 @@ function CampusScene({
         shadow-mapSize-height={2048}
         shadow-mapSize-width={2048}
       />
-      <hemisphereLight args={['#ffffff', '#cdd8d3', 0.7]} />
+      <hemisphereLight args={[dark ? '#d8e2ff' : '#ffffff', dark ? '#21242b' : '#d6ddd8', dark ? 0.45 : 0.7]} />
       <CampusCamera align={align} buildings={buildings} focus={focus} />
       <mesh receiveShadow position={[0, -0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[90, 90]} />
-        <meshStandardMaterial color="#ffffff" roughness={0.92} />
+        <meshStandardMaterial color={dark ? '#1a1d23' : '#f1f3f1'} roughness={0.92} />
       </mesh>
-      <gridHelper args={[90, 45, '#9bb7ab', '#c7d8d0']} position={[0, 0, 0]} />
+      <gridHelper args={[90, 45, dark ? '#343944' : '#c8d1ca', dark ? '#242832' : '#dfe5e0']} position={[0, 0, 0]} />
       {buildingsWithMetadata.map((building) => {
         const metadata = building.metadata!;
         const width = Math.max(metadata.width * SCALE, 0.2);
@@ -154,9 +157,9 @@ function CampusScene({
           >
             <boxGeometry args={[width, height, depth]} />
             <meshStandardMaterial
-              color={highlighted ? highlightColor : '#ffffff'}
+              color={highlighted ? highlightColor : dark ? '#e9e1ea' : '#ffffff'}
               emissive={highlighted ? highlightColor : '#000000'}
-              emissiveIntensity={highlighted ? 1.6 : 0}
+              emissiveIntensity={highlighted ? (dark ? 1.9 : 1.35) : 0}
               toneMapped={false}
             />
           </mesh>
@@ -169,6 +172,7 @@ function CampusScene({
 export function CampusBackground({
   align = 'center',
   campus,
+  colorMode,
   focus = 'center',
   highlightColor,
   highlightedBuildingKeys,
@@ -192,6 +196,7 @@ export function CampusBackground({
       <CampusScene
         align={align}
         campus={campus}
+        colorMode={colorMode}
         focus={focus}
         highlightColor={highlightColor}
         highlightedBuildingKeys={highlightedBuildingKeys}

@@ -228,6 +228,7 @@ export function PlanPage({
   return (
     <Tile
       component="section"
+      tone="sheet"
       sx={{
         boxSizing: 'border-box',
         maxHeight: {
@@ -243,6 +244,8 @@ export function PlanPage({
         '@media (max-width: 600px) and (orientation: portrait)': {
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
           height: 'calc(50svh - 8px)',
           p: 2,
         },

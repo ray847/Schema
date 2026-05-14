@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Alert, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
+import { Alert, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import type { CurrentUser } from '../api/authentication';
 import { Table } from '../components/Table';
 import { Popout } from '../components/Popout';
@@ -559,6 +559,37 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
     return <span className="text-gray-400">No target</span>;
   };
 
+  const renderEnumSelect = (
+    value: any,
+    onChange: (value: any) => void,
+    options: { value: string; label: string }[],
+    placeholder = 'Select Type',
+  ) => (
+    <FormControl fullWidth size="small">
+      <Select
+        displayEmpty
+        onChange={(event) => onChange(event.target.value)}
+        sx={{
+          color: 'text.primary',
+          '& .MuiSelect-select': {
+            color: 'text.primary',
+          },
+          '& .MuiSvgIcon-root': {
+            color: 'text.secondary',
+          },
+        }}
+        value={value ?? ''}
+      >
+        <MenuItem value="">{placeholder}</MenuItem>
+        {options.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+
   const renderPreferenceTable = (tableProps: Record<string, any>) => (
     <Table
       {...tableProps}
@@ -571,16 +602,18 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
           header: 'Target Type',
           inputKey: 'target',
           renderInput: (val, onChange) => (
-            <select
-              className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            <FormControl fullWidth size="small">
+              <Select
+              displayEmpty
               value={val?.targetType || ''}
               onChange={(e) => onChange({ targetType: e.target.value })}
             >
-              <option value="">Select Target</option>
-              <option value="CAMPUS">Campus</option>
-              <option value="BUILDING">Building</option>
-              <option value="ROOM">Room</option>
-            </select>
+              <MenuItem value="">Select Target</MenuItem>
+              <MenuItem value="CAMPUS">Campus</MenuItem>
+              <MenuItem value="BUILDING">Building</MenuItem>
+              <MenuItem value="ROOM">Room</MenuItem>
+            </Select>
+            </FormControl>
           ),
           render: (p) => <span>{renderPreferenceTargetType(getPreferenceTargetType(p))}</span>,
         },
@@ -593,7 +626,7 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
               ? (getPreferenceTarget(targetType, val.key) || val)
               : undefined;
             return (
-              <button
+              <Button
                 disabled={!targetType}
                 onClick={() => targetType && setSelectionConfig({
                   isOpen: true,
@@ -601,15 +634,18 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
                   title: `Select ${renderPreferenceTargetType(targetType)}`,
                   onSelect: (item) => onChange({ ...item, targetType }),
                 })}
-                className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 disabled:bg-gray-50 transition-colors flex justify-between items-center"
+                sx={{
+                  justifyContent: 'space-between',
+                  minHeight: 40,
+                  textAlign: 'left',
+                  width: 1,
+                }}
+                variant="outlined"
               >
-                <span className={selectedTarget?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>
+                <span>
                   {selectedTarget?.name || (targetType ? `Pick ${renderPreferenceTargetType(targetType)}...` : 'Pick type first')}
                 </span>
-                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              </Button>
             );
           },
           render: renderPreferenceTarget,
@@ -618,12 +654,11 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
           header: 'Value',
           inputKey: 'value',
           renderInput: (val, onChange) => (
-            <input
+            <TextField
+              fullWidth
               type="number"
-              min="-1"
-              max="1"
-              step="0.1"
-              className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              size="small"
+              slotProps={{ htmlInput: { max: 1, min: -1, step: 0.1 } }}
               value={val ?? ''}
               onChange={(e) => onChange(e.target.value)}
             />
@@ -665,15 +700,15 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
 
     switch (selectedModel) {
       case 'CAMPUS': return (<Table {...tableProps} data={campusQuery.data?.listCampus} loading={campusQuery.loading} error={campusQuery.error} columns={[{ header: 'Key', render: (c) => <span className="text-xs font-mono text-gray-500">{c.key}</span> }, { header: 'Name', inputKey: 'name', render: (c) => <span className="font-semibold">{c.name}</span> }, { header: 'Address', inputKey: 'address', render: (c) => c.address },]} />);
-      case 'BUILDING': return (<Table {...tableProps} data={buildingQuery.data?.listBuilding} loading={buildingQuery.loading} error={buildingQuery.error} columns={[{ header: 'Key', render: (b) => <span className="text-xs font-mono text-gray-500">{b.key}</span> }, { header: 'Name', inputKey: 'name', render: (b) => <span className="font-semibold">{b.name}</span> }, { header: 'Type', inputKey: 'buildingType', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val || ''} onChange={(e) => onChange(e.target.value)}><option value="">Select Type</option><option value="ACADEMIC">Academic</option><option value="CAFETERIA">Cafeteria</option><option value="LIBRARY">Library</option><option value="OTHER">Other</option></select>), render: (b) => <span className="capitalize">{b.buildingType.toLowerCase()}</span> }, { header: 'Location', inputKey: 'location', render: (b) => b.location }, { header: 'Campus', inputKey: 'campusKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'CAMPUS', title: 'Select Campus', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Campus...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (b) => renderModelReference(b.campus, b.campusKey) },]} />);
+      case 'BUILDING': return (<Table {...tableProps} data={buildingQuery.data?.listBuilding} loading={buildingQuery.loading} error={buildingQuery.error} columns={[{ header: 'Key', render: (b) => <span className="text-xs font-mono text-gray-500">{b.key}</span> }, { header: 'Name', inputKey: 'name', render: (b) => <span className="font-semibold">{b.name}</span> }, { header: 'Type', inputKey: 'buildingType', renderInput: (val, onChange) => renderEnumSelect(val, onChange, [{ value: 'ACADEMIC', label: 'Academic' }, { value: 'CAFETERIA', label: 'Cafeteria' }, { value: 'LIBRARY', label: 'Library' }, { value: 'OTHER', label: 'Other' }]), render: (b) => <span className="capitalize">{b.buildingType.toLowerCase()}</span> }, { header: 'Location', inputKey: 'location', render: (b) => b.location }, { header: 'Campus', inputKey: 'campusKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'CAMPUS', title: 'Select Campus', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Campus...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (b) => renderModelReference(b.campus, b.campusKey) },]} />);
       case 'BUILDING_METADATA': return (<Table {...tableProps} data={buildingMetadataQuery.data?.listBuildingMetadata} loading={buildingMetadataQuery.loading} error={buildingMetadataQuery.error} columns={[{ header: 'Key', render: (m) => <span className="text-xs font-mono text-gray-500">{m.key}</span> }, { header: 'Building', inputKey: 'buildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (m) => renderModelReference(m.building, m.buildingKey) }, { header: 'X', inputKey: 'relativeX', render: (m) => <span className="tabular-nums">{m.relativeX}</span> }, { header: 'Y', inputKey: 'relativeY', render: (m) => <span className="tabular-nums">{m.relativeY}</span> }, { header: 'Width', inputKey: 'width', render: (m) => <span className="tabular-nums">{m.width}</span> }, { header: 'Depth', inputKey: 'depth', render: (m) => <span className="tabular-nums">{m.depth}</span> }, { header: 'Height', inputKey: 'height', render: (m) => <span className="tabular-nums">{m.height}</span> }, { header: 'Rotation', inputKey: 'rotation', render: (m) => <span className="tabular-nums">{m.rotation}</span> },]} />);
-      case 'BUILDING_EDGE': return (<Table {...tableProps} data={buildingEdgeQuery.data?.listBuildingEdge} loading={buildingEdgeQuery.loading} error={buildingEdgeQuery.error} columns={[{ header: 'Key', render: (e) => <span className="text-xs font-mono text-gray-500">{e.key}</span> }, { header: 'From', inputKey: 'fromBuildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select From Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (e) => renderModelReference(e.fromBuilding, e.fromBuildingKey) }, { header: 'To', inputKey: 'toBuildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select To Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (e) => renderModelReference(e.toBuilding, e.toBuildingKey) }, { header: 'Walk Time (sec)', inputKey: 'walkTimeSeconds', renderInput: (val, onChange) => (<input type="number" min="1" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val ?? ''} onChange={(event) => onChange(event.target.value)} />), render: (e) => <span className="tabular-nums">{e.walkTimeSeconds}</span> }, { header: 'Distance (m)', inputKey: 'distanceMeters', renderInput: (val, onChange) => (<input type="number" min="0" step="0.1" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val ?? ''} onChange={(event) => onChange(event.target.value)} />), render: (e) => <span className="tabular-nums">{e.distanceMeters ?? '-'}</span> }, { header: 'Type', inputKey: 'edgeType', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val || 'WALKWAY'} onChange={(event) => onChange(event.target.value)}><option value="WALKWAY">Walkway</option><option value="INDOOR">Indoor</option><option value="STAIRS">Stairs</option><option value="SHUTTLE">Shuttle</option><option value="OTHER">Other</option></select>), render: (e) => <span className="capitalize">{(e.edgeType ?? 'WALKWAY').toLowerCase()}</span> }, { header: 'Two Way', inputKey: 'bidirectional', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={String(val ?? true)} onChange={(event) => onChange(event.target.value === 'true')}><option value="true">Yes</option><option value="false">No</option></select>), render: (e) => e.bidirectional !== false ? 'Yes' : 'No' },]} />);
-      case 'ROOM': return (<Table {...tableProps} data={roomQuery.data?.listRoom} loading={roomQuery.loading} error={roomQuery.error} columns={[{ header: 'Key', render: (r) => <span className="text-xs font-mono text-gray-500">{r.key}</span> }, { header: 'Name', inputKey: 'name', render: (r) => <span className="font-semibold">{r.name}</span> }, { header: 'Type', inputKey: 'roomType', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val || ''} onChange={(e) => onChange(e.target.value)}><option value="">Select Type</option><option value="AUDITORIUM">Auditorium</option><option value="LABORATORY">Laboratory</option><option value="LECTURE">Lecture</option><option value="OFFICE">Office</option><option value="OTHER">Other</option></select>), render: (r) => <span className="capitalize">{r.roomType.toLowerCase()}</span> }, { header: 'Capacity', inputKey: 'capacity', render: (r) => <span className="tabular-nums">{r.capacity}</span> }, { header: 'Floor', inputKey: 'floor', renderInput: (val, onChange) => (<input type="number" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val ?? ''} onChange={(e) => onChange(e.target.value)} />), render: (r) => <span className="tabular-nums">{r.floor}</span> }, { header: 'Facilities (JSON)', inputKey: 'facility', renderInput: (val, onChange) => (<input type="text" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder='{"power_outlet": 2}' value={typeof val === 'object' ? JSON.stringify(val) : val || ''} onChange={(e) => onChange(e.target.value)} />), render: (r) => (<div className="flex flex-wrap gap-2">{(r.facility as any)?.power_outlet > 0 && (<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">🔌 {(r.facility as any).power_outlet} Outlets</span>)}</div>) }, { header: 'Building', inputKey: 'buildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (r) => renderModelReference(r.building, r.buildingKey) },]} />);
+      case 'BUILDING_EDGE': return (<Table {...tableProps} data={buildingEdgeQuery.data?.listBuildingEdge} loading={buildingEdgeQuery.loading} error={buildingEdgeQuery.error} columns={[{ header: 'Key', render: (e) => <span className="text-xs font-mono text-gray-500">{e.key}</span> }, { header: 'From', inputKey: 'fromBuildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select From Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (e) => renderModelReference(e.fromBuilding, e.fromBuildingKey) }, { header: 'To', inputKey: 'toBuildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select To Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (e) => renderModelReference(e.toBuilding, e.toBuildingKey) }, { header: 'Walk Time (sec)', inputKey: 'walkTimeSeconds', renderInput: (val, onChange) => (<input type="number" min="1" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val ?? ''} onChange={(event) => onChange(event.target.value)} />), render: (e) => <span className="tabular-nums">{e.walkTimeSeconds}</span> }, { header: 'Distance (m)', inputKey: 'distanceMeters', renderInput: (val, onChange) => (<input type="number" min="0" step="0.1" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val ?? ''} onChange={(event) => onChange(event.target.value)} />), render: (e) => <span className="tabular-nums">{e.distanceMeters ?? '-'}</span> }, { header: 'Type', inputKey: 'edgeType', renderInput: (val, onChange) => renderEnumSelect(val || 'WALKWAY', onChange, [{ value: 'WALKWAY', label: 'Walkway' }, { value: 'INDOOR', label: 'Indoor' }, { value: 'STAIRS', label: 'Stairs' }, { value: 'SHUTTLE', label: 'Shuttle' }, { value: 'OTHER', label: 'Other' }]), render: (e) => <span className="capitalize">{(e.edgeType ?? 'WALKWAY').toLowerCase()}</span> }, { header: 'Two Way', inputKey: 'bidirectional', renderInput: (val, onChange) => renderEnumSelect(String(val ?? true), (value) => onChange(value === 'true'), [{ value: 'true', label: 'Yes' }, { value: 'false', label: 'No' }], 'Two Way'), render: (e) => e.bidirectional !== false ? 'Yes' : 'No' },]} />);
+      case 'ROOM': return (<Table {...tableProps} data={roomQuery.data?.listRoom} loading={roomQuery.loading} error={roomQuery.error} columns={[{ header: 'Key', render: (r) => <span className="text-xs font-mono text-gray-500">{r.key}</span> }, { header: 'Name', inputKey: 'name', render: (r) => <span className="font-semibold">{r.name}</span> }, { header: 'Type', inputKey: 'roomType', renderInput: (val, onChange) => renderEnumSelect(val, onChange, [{ value: 'AUDITORIUM', label: 'Auditorium' }, { value: 'LABORATORY', label: 'Laboratory' }, { value: 'LECTURE', label: 'Lecture' }, { value: 'OFFICE', label: 'Office' }, { value: 'OTHER', label: 'Other' }]), render: (r) => <span className="capitalize">{r.roomType.toLowerCase()}</span> }, { header: 'Capacity', inputKey: 'capacity', render: (r) => <span className="tabular-nums">{r.capacity}</span> }, { header: 'Floor', inputKey: 'floor', renderInput: (val, onChange) => (<input type="number" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val ?? ''} onChange={(e) => onChange(e.target.value)} />), render: (r) => <span className="tabular-nums">{r.floor}</span> }, { header: 'Facilities (JSON)', inputKey: 'facility', renderInput: (val, onChange) => (<input type="text" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder='{"power_outlet": 2}' value={typeof val === 'object' ? JSON.stringify(val) : val || ''} onChange={(e) => onChange(e.target.value)} />), render: (r) => (<div className="flex flex-wrap gap-2">{(r.facility as any)?.power_outlet > 0 && (<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">🔌 {(r.facility as any).power_outlet} Outlets</span>)}</div>) }, { header: 'Building', inputKey: 'buildingKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'BUILDING', title: 'Select Building', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Building...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (r) => renderModelReference(r.building, r.buildingKey) },]} />);
       case 'PERSON': return (<Table {...tableProps} data={personQuery.data?.listPerson} loading={personQuery.loading} error={personQuery.error} columns={[{ header: 'Key', render: (p) => <span className="text-xs font-mono text-gray-500">{p.key}</span> }, { header: 'Code', inputKey: 'personCode', render: (p) => <span className="font-mono">{p.personCode}</span> }, { header: 'Name', inputKey: 'name', render: (p) => <span className="font-semibold">{p.name}</span> }, { header: 'Role', inputKey: 'role', render: (p) => p.role },]} />);
       case 'COURSE': return (<Table {...tableProps} data={courseQuery.data?.listCourse} loading={courseQuery.loading} error={courseQuery.error} columns={[{ header: 'Key', render: (c) => <span className="text-xs font-mono text-gray-500">{c.key}</span> }, { header: 'Code', inputKey: 'courseCode', render: (c) => <span className="font-mono">{c.courseCode}</span> }, { header: 'Name', inputKey: 'name', render: (c) => <span className="font-semibold">{c.name}</span> },]} />);
       case 'ACTIVITY': return (<Table {...tableProps} data={activityQuery.data?.listActivity} loading={activityQuery.loading} error={activityQuery.error} columns={[{ header: 'Key', render: (a) => <span className="text-xs font-mono text-gray-500">{a.key}</span> }, { header: 'Name', inputKey: 'name', render: (a) => <span className="font-semibold">{a.name}</span> }, { header: 'Host', inputKey: 'personKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'PERSON', title: 'Select Host', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Host...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => renderModelReference(a.person, a.personKey) },]} />);
       case 'COURSE_TEACHER': return (<Table {...tableProps} data={courseTeacherQuery.data?.listCourseTeacher.map((ct: any, i: number) => ({ ...ct, key: `${ct.personKey}-${ct.courseKey}-${i}` }))} loading={courseTeacherQuery.loading} error={courseTeacherQuery.error} columns={[{ header: 'Teacher', inputKey: 'personKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'PERSON', title: 'Select Teacher', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Teacher...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (ct) => renderModelReference(ct.person, ct.personKey) }, { header: 'Course', inputKey: 'courseKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'COURSE', title: 'Select Course', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Pick a Course...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (ct) => renderModelReference(ct.course, ct.courseKey) }, { header: 'Responsibility', inputKey: 'responsibility', render: (ct) => ct.responsibility },]} />);
-      case 'ALLOCATION': return (<Table {...tableProps} data={allocationQuery.data?.listAllocation} loading={allocationQuery.loading} error={allocationQuery.error} columns={[{ header: 'Key', render: (a) => <span className="text-xs font-mono text-gray-500">{a.key}</span> }, { header: 'Event Type', inputKey: 'eventType', renderInput: (val, onChange) => (<select className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" value={val || ''} onChange={(e) => onChange(e.target.value)}><option value="">Select Type</option><option value="ACTIVITY">Activity</option><option value="COURSE">Course</option></select>), render: (a) => <span className="capitalize">{a.eventType.toLowerCase()}</span> }, { header: 'Event', inputKey: 'eventKey', renderInput: (val, onChange, rowData) => (<button disabled={!rowData.eventType} onClick={() => setSelectionConfig({ isOpen: true, model: rowData.eventType as ModelType, title: `Select ${rowData.eventType}`, onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 disabled:bg-gray-50 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || (rowData.eventType ? `Pick ${rowData.eventType}...` : 'Pick type first')}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => { if (typeof a.eventKey === 'object' && (a.eventKey as any).name) return renderModelReference(a.eventKey); const idStr = String(a.eventKey); if (a.eventType === 'COURSE') { const course = courseQuery.data?.listCourse.find((c: any) => c.key === idStr); return renderModelReference(course, idStr); } if (a.eventType === 'ACTIVITY') { const activity = activityQuery.data?.listActivity.find((act: any) => act.key === idStr); return renderModelReference(activity, idStr); } return renderModelReference(undefined, idStr); } }, { header: 'Start Time', inputKey: 'startTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.startTime)}</span> }, { header: 'End Time', inputKey: 'endTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.endTime)}</span> }, { header: 'Room', inputKey: 'roomKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'ROOM', title: 'Select Room', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Room...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => renderModelReference(a.room, a.roomKey) },]} />);
+      case 'ALLOCATION': return (<Table {...tableProps} data={allocationQuery.data?.listAllocation} loading={allocationQuery.loading} error={allocationQuery.error} columns={[{ header: 'Key', render: (a) => <span className="text-xs font-mono text-gray-500">{a.key}</span> }, { header: 'Event Type', inputKey: 'eventType', renderInput: (val, onChange) => renderEnumSelect(val, onChange, [{ value: 'ACTIVITY', label: 'Activity' }, { value: 'COURSE', label: 'Course' }]), render: (a) => <span className="capitalize">{a.eventType.toLowerCase()}</span> }, { header: 'Event', inputKey: 'eventKey', renderInput: (val, onChange, rowData) => (<button disabled={!rowData.eventType} onClick={() => setSelectionConfig({ isOpen: true, model: rowData.eventType as ModelType, title: `Select ${rowData.eventType}`, onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 disabled:bg-gray-50 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || (rowData.eventType ? `Pick ${rowData.eventType}...` : 'Pick type first')}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => { if (typeof a.eventKey === 'object' && (a.eventKey as any).name) return renderModelReference(a.eventKey); const idStr = String(a.eventKey); if (a.eventType === 'COURSE') { const course = courseQuery.data?.listCourse.find((c: any) => c.key === idStr); return renderModelReference(course, idStr); } if (a.eventType === 'ACTIVITY') { const activity = activityQuery.data?.listActivity.find((act: any) => act.key === idStr); return renderModelReference(activity, idStr); } return renderModelReference(undefined, idStr); } }, { header: 'Start Time', inputKey: 'startTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.startTime)}</span> }, { header: 'End Time', inputKey: 'endTime', renderInput: (val, onChange) => (<input type="text" inputMode="numeric" className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="dd/mm/yyyy HH:mm" value={formatDateTime(val)} onChange={(e) => onChange(parseDateTimeInput(e.target.value))} />), render: (a) => <span className="tabular-nums">{formatDateTime(a.endTime)}</span> }, { header: 'Room', inputKey: 'roomKey', renderInput: (val, onChange) => (<button onClick={() => setSelectionConfig({ isOpen: true, model: 'ROOM', title: 'Select Room', onSelect: onChange })} className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded text-sm text-left border-gray-200 hover:border-blue-500 transition-colors flex justify-between items-center"><span className={val?.name ? 'text-gray-900 font-medium' : 'text-gray-400'}>{val?.name || val || 'Select Room...'}</span><svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>), render: (a) => renderModelReference(a.room, a.roomKey) },]} />);
     }
   };
 
@@ -681,63 +716,97 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
   const hasPendingDeletions = pendingDeletions[selectedModel].length > 0;
   const hasPendingUpdates = Object.keys(pendingUpdates[selectedModel]).length > 0;
   const hasTotalPending = hasPendingChanges || hasPendingDeletions || hasPendingUpdates;
+  const renderControls = () => (
+    <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap">
+        {preferenceOnly ? (
+          null
+        ) : (
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: 240,
+              '& .MuiOutlinedInput-root': {
+                bgcolor: 'transparent',
+              },
+              '& .MuiOutlinedInput-root.Mui-focused': {
+                bgcolor: 'transparent',
+              },
+            }}
+          >
+            <InputLabel id="console-table-select-label">Table</InputLabel>
+            <Select
+              label="Table"
+              labelId="console-table-select-label"
+              onChange={(event) => setSelectedModel(event.target.value as ModelType)}
+              value={selectedModel}
+            >
+              {options.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {hasTotalPending && (
+          <div className="flex gap-2">
+            {hasPendingChanges && <Chip color="warning" label={`${pendingChanges[selectedModel].length} pending insert`} size="small" variant="outlined" />}
+            {hasPendingDeletions && <Chip color="error" label={`${pendingDeletions[selectedModel].length} pending delete`} size="small" variant="outlined" />}
+            {hasPendingUpdates && <Chip color="info" label={`${Object.keys(pendingUpdates[selectedModel]).length} pending update`} size="small" variant="outlined" />}
+          </div>
+        )}
+      </div>
+      {canModifySelectedModel && (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {editable && !preferenceOnly && (
+            <>
+              <input
+                ref={csvInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                hidden
+                onChange={(event) => {
+                  void handleCsvImport(event.target.files?.[0] ?? null);
+                  event.target.value = '';
+                }}
+              />
+              <Button onClick={() => csvInputRef.current?.click()} size="small" variant="outlined">
+                Import CSV
+              </Button>
+            </>
+          )}
+          <Button onClick={handleApply} disabled={!hasTotalPending} size="small" variant="contained">
+            Apply changes
+          </Button>
+        </Stack>
+      )}
+    </div>
+  );
+
+  if (preferenceOnly) {
+    return (
+      <div className="space-y-8">
+        {csvImportError && <Alert severity="error">{csvImportError}</Alert>}
+        <Tile component="section">
+          <Stack spacing={2}>
+            <Typography variant="h6">Preferences</Typography>
+            {renderControls()}
+            {renderContent()}
+          </Stack>
+        </Tile>
+        <Popout isOpen={selectionConfig.isOpen} onClose={() => setSelectionConfig({ ...selectionConfig, isOpen: false })} title={selectionConfig.title} className="max-w-4xl"><div className="space-y-4"><p className="text-sm text-gray-600">Please select an entry to populate the field.</p><div className="border border-gray-100 rounded-xl overflow-hidden shadow-inner bg-gray-50/30">{renderSelectionTable()}</div></div></Popout>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
+      <Tile component="section" sx={{ p: 2 }}>
+        {renderControls()}
+      </Tile>
+      {csvImportError && <Alert severity="error">{csvImportError}</Alert>}
       <Tile component="section">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-baseline gap-3">
-            {preferenceOnly ? (
-              <h2 className="text-xl font-semibold tracking-tight text-gray-800">{options.find(opt => opt.value === selectedModel)?.label}</h2>
-            ) : (
-              <FormControl size="small" sx={{ minWidth: 240 }}>
-                <InputLabel id="console-table-select-label">Table</InputLabel>
-                <Select
-                  label="Table"
-                  labelId="console-table-select-label"
-                  onChange={(event) => setSelectedModel(event.target.value as ModelType)}
-                  value={selectedModel}
-                >
-                  {options.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-            {hasTotalPending && (
-              <div className="flex gap-2">
-                {hasPendingChanges && <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">{pendingChanges[selectedModel].length} pending insert</span>}
-                {hasPendingDeletions && <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">{pendingDeletions[selectedModel].length} pending delete</span>}
-                {hasPendingUpdates && <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">{Object.keys(pendingUpdates[selectedModel]).length} pending update</span>}
-              </div>
-            )}
-          </div>
-          {canModifySelectedModel && (
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              {editable && !preferenceOnly && (
-                <>
-                  <input
-                    ref={csvInputRef}
-                    type="file"
-                    accept=".csv,text/csv"
-                    hidden
-                    onChange={(event) => {
-                      void handleCsvImport(event.target.files?.[0] ?? null);
-                      event.target.value = '';
-                    }}
-                  />
-                  <Button onClick={() => csvInputRef.current?.click()} size="small" variant="outlined">
-                    Import CSV
-                  </Button>
-                </>
-              )}
-              <button onClick={handleApply} disabled={!hasTotalPending} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all flex items-center gap-2"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Apply Changes</button>
-            </Stack>
-          )}
-        </div>
-        {csvImportError && <Alert severity="error" sx={{ mb: 2 }}>{csvImportError}</Alert>}
         {renderContent()}
       </Tile>
       <Popout isOpen={selectionConfig.isOpen} onClose={() => setSelectionConfig({ ...selectionConfig, isOpen: false })} title={selectionConfig.title} className="max-w-4xl"><div className="space-y-4"><p className="text-sm text-gray-600">Please select an entry to populate the field.</p><div className="border border-gray-100 rounded-xl overflow-hidden shadow-inner bg-gray-50/30">{renderSelectionTable()}</div></div></Popout>

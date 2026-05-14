@@ -5,8 +5,9 @@
 * ~~Add table editing.~~
 * ~~Implement user & preference system.~~
 * ~~Frontend refactor~~
-  * Use mui data grid for tables in replacement for the current one
+  * ~~Use mui data grid for tables in replacement for the current one~~
 * ~~Routing functionality~~
+  * User lession registering.
 * NL2SQL
 
 ## Quality of Life
@@ -15,7 +16,8 @@
 * ~~User presets / template for tasks.~~
 * Visualization for the routing algorithm.
 * ~~Remove metadata tables from standard & spectate user console.~~
-* More consistent styling.
+* ~~More consistent styling.~~
+* UI refinement.
 
 ## Bug
 

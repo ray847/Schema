@@ -1,9 +1,20 @@
-import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from '@mui/material';
 import { Tile } from '../components/Tile';
+import type { ThemeModePreference } from '../theme/materialYouTheme';
 
 interface SettingsPageProps {
   accentColor: string;
   onAccentColorChange: (color: string) => void;
+  onThemeModeChange: (mode: ThemeModePreference) => void;
+  themeMode: ThemeModePreference;
 }
 
 const accentPresets = [
@@ -18,6 +29,8 @@ const accentPresets = [
 export function SettingsPage({
   accentColor,
   onAccentColorChange,
+  onThemeModeChange,
+  themeMode,
 }: SettingsPageProps) {
   return (
     <Tile component="section" aria-labelledby="settings-title">
@@ -66,6 +79,27 @@ export function SettingsPage({
               ))}
             </Stack>
           </Stack>
+        </Stack>
+
+        <Stack spacing={1.5}>
+          <Box>
+            <Typography variant="subtitle1">Theme mode</Typography>
+            <Typography color="text.secondary" variant="body2">
+              Use a fixed light or dark scheme, or follow the system preference.
+            </Typography>
+          </Box>
+          <ToggleButtonGroup
+            exclusive
+            onChange={(_event, value: ThemeModePreference | null) => {
+              if (value) onThemeModeChange(value);
+            }}
+            size="small"
+            value={themeMode}
+          >
+            <ToggleButton value="system">System</ToggleButton>
+            <ToggleButton value="light">Light</ToggleButton>
+            <ToggleButton value="dark">Dark</ToggleButton>
+          </ToggleButtonGroup>
         </Stack>
       </Stack>
     </Tile>

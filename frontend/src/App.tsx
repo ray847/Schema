@@ -20,6 +20,7 @@ import {
   SettingsPage,
   UserPage,
 } from './pages';
+import type { EffectiveThemeMode, ThemeModePreference } from './theme/materialYouTheme';
 import './App.css';
 
 type AppPage = 'plan' | 'console' | 'user' | 'settings';
@@ -35,10 +36,19 @@ const pageOptions: NavBarItem<NavPage>[] = [
 
 interface AppProps {
   accentColor: string;
+  effectiveThemeMode: EffectiveThemeMode;
   onAccentColorChange: (color: string) => void;
+  onThemeModeChange: (mode: ThemeModePreference) => void;
+  themeMode: ThemeModePreference;
 }
 
-function App({ accentColor, onAccentColorChange }: AppProps) {
+function App({
+  accentColor,
+  effectiveThemeMode,
+  onAccentColorChange,
+  onThemeModeChange,
+  themeMode,
+}: AppProps) {
   const phonePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
   const { user, loading } = useAuth();
   const campusQuery = usePlanningCampuses();
@@ -95,6 +105,8 @@ function App({ accentColor, onAccentColorChange }: AppProps) {
           <SettingsPage
             accentColor={accentColor}
             onAccentColorChange={onAccentColorChange}
+            onThemeModeChange={onThemeModeChange}
+            themeMode={themeMode}
           />
         );
     }
@@ -106,6 +118,7 @@ function App({ accentColor, onAccentColorChange }: AppProps) {
         <CampusBackground
           align={backgroundAlign}
           campus={selectedCampus}
+          colorMode={effectiveThemeMode}
           focus={focusTop ? 'top' : 'center'}
           highlightColor={accentColor}
           highlightedBuildingKeys={routeBuildingKeys}
@@ -125,6 +138,7 @@ function App({ accentColor, onAccentColorChange }: AppProps) {
           ml: phonePortrait ? 0 : `${NAV_BAR_EDGE_SIZE}px`,
           minWidth: 0,
           minHeight: '100svh',
+          bgcolor: 'transparent',
           pb: phonePortrait ? `${NAV_BAR_EDGE_SIZE}px` : 0,
           position: 'relative',
           zIndex: 1,
@@ -136,7 +150,7 @@ function App({ accentColor, onAccentColorChange }: AppProps) {
             display: phonePortrait && bottomPanelPage ? 'flex' : 'block',
             minHeight: phonePortrait ? `calc(100svh - ${NAV_BAR_EDGE_SIZE}px)` : 'auto',
             alignItems: phonePortrait && bottomPanelPage ? 'flex-end' : undefined,
-            px: phonePortrait && bottomPanelPage ? 0 : { xs: 2, sm: 3 },
+            px: phonePortrait && bottomPanelPage ? 2 : { xs: 2, sm: 3 },
             py: phonePortrait && bottomPanelPage ? 0 : { xs: 3, md: 5 },
           }}
         >

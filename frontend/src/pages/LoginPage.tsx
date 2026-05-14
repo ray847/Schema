@@ -44,6 +44,7 @@ export function LoginPage() {
     <Tile
       aria-labelledby="auth-title"
       component="section"
+      tone="sheet"
       sx={{
         maxWidth: 460,
         p: 4,
@@ -51,6 +52,8 @@ export function LoginPage() {
         '@media (max-width: 600px) and (orientation: portrait)': {
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
           height: 'calc(50svh - 8px)',
           maxHeight: 'calc(50svh - 8px)',
           maxWidth: 'none',

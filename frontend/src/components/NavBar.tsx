@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Paper, Tab, Tabs } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
 export type NavBarSide = 'top' | 'bottom' | 'left' | 'right';
 export const NAV_BAR_EDGE_SIZE = 96;
@@ -43,12 +44,8 @@ export function NavBar<T extends string>({
       elevation={0}
       square
       sx={{
-        bgcolor: 'background.paper',
-        borderColor: 'divider',
-        borderBottom: side === 'top' ? 1 : 0,
-        borderLeft: side === 'right' ? 1 : 0,
-        borderRight: side === 'left' ? 1 : 0,
-        borderTop: side === 'bottom' ? 1 : 0,
+        bgcolor: (theme) => theme.palette.background.paper,
+        border: 0,
         bottom: edgePosition.bottom,
         left: edgePosition.left,
         position: 'fixed',
@@ -65,20 +62,38 @@ export function NavBar<T extends string>({
         aria-label={ariaLabel}
         onChange={(_event, value: T) => onChange(value)}
         orientation={vertical ? 'vertical' : 'horizontal'}
-        scrollButtons="auto"
+        scrollButtons={vertical ? 'auto' : false}
         sx={{
           minHeight: vertical ? '100vh' : NAV_BAR_EDGE_SIZE,
           '& .MuiTabs-flexContainer': {
             alignItems: vertical ? 'stretch' : 'center',
+            gap: vertical ? 1 : 0.5,
+            p: vertical ? 1 : 0.75,
+            width: vertical ? 'auto' : '100%',
+          },
+          '& .MuiTabs-indicator': {
+            display: 'none',
           },
           '& .MuiTab-root': {
-            minHeight: vertical ? 76 : NAV_BAR_EDGE_SIZE,
-            minWidth: vertical ? NAV_BAR_EDGE_SIZE : 90,
+            borderRadius: 999,
+            color: 'text.secondary',
+            flex: vertical ? '0 0 auto' : '1 1 0',
+            fontWeight: 700,
+            minHeight: vertical ? 74 : 78,
+            minWidth: vertical ? NAV_BAR_EDGE_SIZE - 16 : 0,
             px: 1,
+            transition: 'background-color 180ms ease, color 180ms ease',
+            '&.Mui-selected': {
+              bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.24 : 0.14),
+              color: 'primary.main',
+            },
+            '&:hover': {
+              bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.14 : 0.08),
+            },
           },
         }}
         value={activeKey ?? false}
-        variant="scrollable"
+        variant={vertical ? 'scrollable' : 'fullWidth'}
       >
         {items.map((item) => {
           const label = item.label ?? (item.icon ? undefined : item.key);
