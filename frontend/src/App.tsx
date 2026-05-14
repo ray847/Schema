@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import MapIcon from '@mui/icons-material/Map';
+import ArrowOutward from '@mui/icons-material/ArrowOutward'
+import Face from '@mui/icons-material/Face'
+import Dashboard from '@mui/icons-material/Dashboard'
 import SettingsIcon from '@mui/icons-material/Settings';
-import StorageIcon from '@mui/icons-material/Storage';
-import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Container, Typography, useMediaQuery } from '@mui/material';
+import { CampusBackground } from './components/CampusBackground';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { NavBar, NAV_BAR_EDGE_SIZE, type NavBarItem } from './components/NavBar';
 import { useAuth } from './features/authentication';
+import {
+  defaultTask,
+  type TaskDraft,
+  usePlanningCampuses,
+} from './features/planning';
+import type { Solution } from './domain';
 import {
   ConsolePage,
   LoginPage,
@@ -23,21 +23,48 @@ import {
 } from './pages';
 import './App.css';
 
-type AppPage = 'plan' | 'console' | 'user' | 'settings' | 'login';
-type NavPage = Exclude<AppPage, 'login'>;
+type AppPage = 'plan' | 'console' | 'user' | 'settings';
+type NavPage = AppPage;
+type PlanningMode = 'input' | 'route';
 
 const pageOptions: NavBarItem<NavPage>[] = [
-  { key: 'plan', label: 'Plan', icon: <MapIcon /> },
-  { key: 'console', label: 'Console', icon: <StorageIcon /> },
-  { key: 'user', label: 'User', icon: <AccountCircleIcon /> },
+  { key: 'plan', label: 'Plan', icon: <ArrowOutward /> },
+  { key: 'console', label: 'Console', icon: <Dashboard /> },
+  { key: 'user', label: 'User', icon: <Face /> },
   { key: 'settings', label: 'Settings', icon: <SettingsIcon /> },
 ];
 
-function App() {
-  const { user, loading, signOut } = useAuth();
+interface AppProps {
+  accentColor: string;
+  onAccentColorChange: (color: string) => void;
+}
+
+function App({ accentColor, onAccentColorChange }: AppProps) {
+  const phonePortrait = useMediaQuery('(max-width: 600px) and (orientation: portrait)');
+  const { user, loading } = useAuth();
+  const campusQuery = usePlanningCampuses();
   const [activePage, setActivePage] = useState<AppPage>('plan');
-  const isAdmin = user?.type === 'admin';
-  const currentPage = user && activePage === 'login' ? 'plan' : activePage;
+  const [selectedCampusKey, setSelectedCampusKey] = useState<string | null>(null);
+  const [routeBuildingKeys, setRouteBuildingKeys] = useState<string[]>([]);
+  const [planningMode, setPlanningMode] = useState<PlanningMode>('input');
+  const [planningSolution, setPlanningSolution] = useState<Solution | null>(null);
+  const [planningTaskDrafts, setPlanningTaskDrafts] = useState<TaskDraft[]>([
+    defaultTask(1),
+    defaultTask(2),
+  ]);
+  const campuses = campusQuery.data?.listCampus ?? [];
+  const selectedCampus =
+    campuses.find((campus) => campus.key === selectedCampusKey) ??
+    campuses[0] ??
+    null;
+  const activeCampusKey = selectedCampus?.key ?? selectedCampusKey;
+  const backgroundAlign =
+    !phonePortrait && (activePage === 'plan' || (activePage === 'user' && !user))
+      ? 'right'
+      : 'center';
+  const bottomPanelPage = activePage === 'plan' || (activePage === 'user' && !user);
+  const orientationPortrait = useMediaQuery('(orientation: portrait)');
+  const focusTop = orientationPortrait && (activePage === 'plan' || (activePage === 'user' && !user));
 
   if (loading) {
     return (
@@ -48,75 +75,78 @@ function App() {
   }
 
   const renderPage = () => {
-    switch (currentPage) {
+    switch (activePage) {
       case 'plan':
-        return <PlanPage />;
+        return (
+          <PlanPage
+            mode={planningMode}
+            taskDrafts={planningTaskDrafts}
+            solution={planningSolution}
+            selectedCampusKey={activeCampusKey}
+            onCampusChange={setSelectedCampusKey}
+            onModeChange={setPlanningMode}
+            onRouteBuildingKeysChange={setRouteBuildingKeys}
+            onSolutionChange={setPlanningSolution}
+            onTaskDraftsChange={setPlanningTaskDrafts}
+          />
+        );
       case 'console':
         return <ConsolePage currentUser={user} />;
       case 'user':
-        return <UserPage currentUser={user} />;
+        return user ? <UserPage currentUser={user} /> : <LoginPage />;
       case 'settings':
-        return <SettingsPage />;
-      case 'login':
-        return <LoginPage />;
+        return (
+          <SettingsPage
+            accentColor={accentColor}
+            onAccentColorChange={onAccentColorChange}
+          />
+        );
     }
   };
 
   return (
     <>
+      <ErrorBoundary>
+        <CampusBackground
+          align={backgroundAlign}
+          campus={selectedCampus}
+          focus={focusTop ? 'top' : 'center'}
+          highlightColor={accentColor}
+          highlightedBuildingKeys={routeBuildingKeys}
+        />
+      </ErrorBoundary>
       <NavBar
-        activeKey={currentPage === 'login' ? undefined : currentPage}
+        activeKey={activePage}
         ariaLabel="Application pages"
         items={pageOptions}
         onChange={(page) => setActivePage(page)}
-        side="left"
+        side={phonePortrait ? 'bottom' : 'left'}
       />
 
       <Box
         component="main"
         sx={{
-          ml: `${NAV_BAR_EDGE_SIZE}px`,
-          width: `calc(100vw - ${NAV_BAR_EDGE_SIZE}px)`,
+          ml: phonePortrait ? 0 : `${NAV_BAR_EDGE_SIZE}px`,
+          minWidth: 0,
+          minHeight: '100svh',
+          pb: phonePortrait ? `${NAV_BAR_EDGE_SIZE}px` : 0,
+          position: 'relative',
+          zIndex: 1,
         }}
       >
-        <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
-          <Stack spacing={3}>
-            <Paper component="header" elevation={0} sx={{ p: 3 }}>
-              <Stack
-                direction={{ xs: 'column', md: 'row' }}
-                spacing={2}
-                sx={{
-                  alignItems: { xs: 'stretch', md: 'center' },
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Box>
-                  <Typography color="text.secondary" sx={{ fontWeight: 800, letterSpacing: 1.2 }} variant="overline">
-                    {isAdmin ? 'Admin console' : user ? `${user.type} workspace` : 'Spectate mode'}
-                  </Typography>
-                  <Typography variant="h3">Space Planning</Typography>
-                </Box>
-
-                {user ? (
-                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                    <Typography color="text.secondary" variant="body2">
-                      {user.email}
-                    </Typography>
-                    <Chip label={user.type} size="small" />
-                    <Button onClick={signOut} variant="outlined">
-                      Sign out
-                    </Button>
-                  </Stack>
-                ) : (
-                  <Button onClick={() => setActivePage('login')} variant="outlined">
-                    Sign in
-                  </Button>
-                )}
-              </Stack>
-            </Paper>
-
+        <Container
+          maxWidth="lg"
+          sx={{
+            display: phonePortrait && bottomPanelPage ? 'flex' : 'block',
+            minHeight: phonePortrait ? `calc(100svh - ${NAV_BAR_EDGE_SIZE}px)` : 'auto',
+            alignItems: phonePortrait && bottomPanelPage ? 'flex-end' : undefined,
+            px: phonePortrait && bottomPanelPage ? 0 : { xs: 2, sm: 3 },
+            py: phonePortrait && bottomPanelPage ? 0 : { xs: 3, md: 5 },
+          }}
+        >
+          <ErrorBoundary fallback={<Alert severity="error">This page failed to render. Check the browser console for details.</Alert>}>
             {renderPage()}
-          </Stack>
+          </ErrorBoundary>
         </Container>
       </Box>
     </>

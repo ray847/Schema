@@ -7,6 +7,7 @@ from shared.key import Key
 if TYPE_CHECKING:
     from .campus import CampusModel
     from .room import RoomModel
+    from .building_metadata import BuildingMetadataModel
 
 
 """Pydantic Models"""
@@ -73,6 +74,33 @@ class BuildingModel:
             )
             for row in res
         ]
+
+    @strawberry.field
+    async def metadata(
+        self, info: strawberry.Info
+    ) -> Annotated["BuildingMetadataModel", strawberry.lazy(".building_metadata")] | None:
+        from .building_metadata import BuildingMetadataModel
+        import db
+
+        view = db.View(db.TableRegistry.BUILDING_METADATA).filter(
+            "building_key = ?",
+            (int(self.key),),
+        )
+        res = await info.context.db_context.execute(view)
+        if not res:
+            return None
+
+        row = res[0]
+        return BuildingMetadataModel(
+            key=row["key"],
+            building_key=row["building_key"],
+            relative_x=row["relative_x"],
+            relative_y=row["relative_y"],
+            width=row["width"],
+            depth=row["depth"],
+            height=row["height"],
+            rotation=row["rotation"],
+        )
 
 
 @strawberry.experimental.pydantic.input(model=BuildingCreate, all_fields=True)

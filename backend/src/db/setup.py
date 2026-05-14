@@ -95,6 +95,56 @@ VALUES (?, ?, ?, ?)""",
         (2, "Business Center", "academic", "East Side"),
     )
 
+    # BuildingMetadata
+    execute_logged(
+        conn,
+        "INSERT",
+        """
+INSERT INTO BuildingMetadata (
+    building_key,
+    relative_x,
+    relative_y,
+    width,
+    depth,
+    height,
+    rotation
+)
+VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (1, 0.0, 0.0, 80.0, 40.0, 24.0, 0.0),
+    )
+    execute_logged(
+        conn,
+        "INSERT",
+        """
+INSERT INTO BuildingMetadata (
+    building_key,
+    relative_x,
+    relative_y,
+    width,
+    depth,
+    height,
+    rotation
+)
+VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (2, 120.0, 30.0, 60.0, 60.0, 18.0, 15.0),
+    )
+    execute_logged(
+        conn,
+        "INSERT",
+        """
+INSERT INTO BuildingMetadata (
+    building_key,
+    relative_x,
+    relative_y,
+    width,
+    depth,
+    height,
+    rotation
+)
+VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (3, 40.0, 160.0, 70.0, 45.0, 30.0, -10.0),
+    )
+
     # BuildingEdge
     execute_logged(
         conn,

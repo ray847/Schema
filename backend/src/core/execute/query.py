@@ -2,6 +2,7 @@ import json
 import strawberry
 from shared.model.campus import CampusModel
 from shared.model.building import BuildingModel
+from shared.model.building_metadata import BuildingMetadataModel
 from shared.model.building_edge import BuildingEdgeModel
 from shared.model.room import RoomModel
 from shared.model.person import PersonModel
@@ -43,6 +44,26 @@ class Query:
                 building_type=row["building_type"],
                 location=row["location"],
                 campus_key=row["campus_key"],
+            )
+            for row in res  # type: ignore
+        ]
+
+    @strawberry.field
+    async def list_building_metadata(
+        self, info: strawberry.Info[ExecutionContext]
+    ) -> list[BuildingMetadataModel]:
+        view = db.View(db.TableRegistry.BUILDING_METADATA)
+        res = await info.context.db_context.execute(view)
+        return [
+            BuildingMetadataModel(
+                key=row["key"],
+                building_key=row["building_key"],
+                relative_x=row["relative_x"],
+                relative_y=row["relative_y"],
+                width=row["width"],
+                depth=row["depth"],
+                height=row["height"],
+                rotation=row["rotation"],
             )
             for row in res  # type: ignore
         ]

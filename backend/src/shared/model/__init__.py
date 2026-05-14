@@ -5,6 +5,12 @@ from .building import (
     BuildingModel,
     BuildingInput,
 )
+from .building_metadata import (
+    BuildingMetadataCreate,
+    BuildingMetadataResponse,
+    BuildingMetadataModel,
+    BuildingMetadataInput,
+)
 from .building_edge import (
     BuildingEdgeCreate,
     BuildingEdgeResponse,
@@ -48,6 +54,10 @@ __all__ = [
     "BuildingResponse",
     "BuildingModel",
     "BuildingInput",
+    "BuildingMetadataCreate",
+    "BuildingMetadataResponse",
+    "BuildingMetadataModel",
+    "BuildingMetadataInput",
     "BuildingEdgeCreate",
     "BuildingEdgeResponse",
     "BuildingEdgeModel",

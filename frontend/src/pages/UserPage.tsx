@@ -1,11 +1,15 @@
-import { Alert, Box, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Paper, Stack, Typography } from '@mui/material';
 import type { CurrentUser } from '../api/authentication';
+import { useAuth } from '../features/authentication';
+import { ConsoleView } from './ConsolePage';
 
 interface UserPageProps {
   currentUser: CurrentUser | null;
 }
 
 export function UserPage({ currentUser }: UserPageProps) {
+  const { signOut } = useAuth();
+
   return (
     <Paper component="section" elevation={0} sx={{ border: 1, borderColor: 'divider', p: 3 }} aria-labelledby="preference-title">
       <Stack spacing={2}>
@@ -17,15 +21,31 @@ export function UserPage({ currentUser }: UserPageProps) {
             Preferences
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">
-            User preference management will live here. For now, authenticated
-            users can edit preferences from the console table selector.
+            Manage your personal room, building, and campus preference weights.
           </Typography>
         </Box>
-        <Alert severity={currentUser ? 'info' : 'warning'}>
-          {currentUser
-            ? `Signed in as ${currentUser.email}.`
-            : 'Sign in before editing personal room, building, or campus weights.'}
-        </Alert>
+        {currentUser ? (
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{
+              alignItems: { xs: 'stretch', sm: 'center' },
+              justifyContent: 'space-between',
+            }}
+          >
+            <Alert severity="info" sx={{ flex: 1 }}>
+              Signed in as {currentUser.email}.
+            </Alert>
+            <Button onClick={signOut} variant="outlined">
+              Sign out
+            </Button>
+          </Stack>
+        ) : (
+          <Alert severity="warning">
+            Sign in before editing personal room, building, or campus weights.
+          </Alert>
+        )}
+        {currentUser && <ConsoleView currentUser={currentUser} preferenceOnly />}
       </Stack>
     </Paper>
   );

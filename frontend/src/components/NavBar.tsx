@@ -54,7 +54,7 @@ export function NavBar<T extends string>({
         position: 'fixed',
         right: edgePosition.right,
         top: edgePosition.top,
-        height: vertical ? '100vh' : 'auto',
+        height: vertical ? '100vh' : NAV_BAR_EDGE_SIZE,
         width: vertical ? NAV_BAR_EDGE_SIZE : '100vw',
         zIndex: (theme) => theme.zIndex.appBar,
       }}
@@ -67,12 +67,12 @@ export function NavBar<T extends string>({
         orientation={vertical ? 'vertical' : 'horizontal'}
         scrollButtons="auto"
         sx={{
-          minHeight: vertical ? '100vh' : undefined,
+          minHeight: vertical ? '100vh' : NAV_BAR_EDGE_SIZE,
           '& .MuiTabs-flexContainer': {
             alignItems: vertical ? 'stretch' : 'center',
           },
           '& .MuiTab-root': {
-            minHeight: vertical ? 76 : 64,
+            minHeight: vertical ? 76 : NAV_BAR_EDGE_SIZE,
             minWidth: vertical ? NAV_BAR_EDGE_SIZE : 90,
             px: 1,
           },

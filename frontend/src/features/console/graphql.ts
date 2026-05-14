@@ -39,6 +39,15 @@ export const LIST_BUILDING = gql`
         key
         name
       }
+      metadata {
+        key
+        relativeX
+        relativeY
+        width
+        depth
+        height
+        rotation
+      }
     }
   }
 `;
@@ -58,6 +67,43 @@ export const DELETE_BUILDING = gql`
 export const UPDATE_BUILDING = gql`
   mutation UpdateBuilding($key: ID!, $replacements: JSON!) {
     updateBuilding(key: $key, replacements: $replacements)
+  }
+`;
+
+export const LIST_BUILDING_METADATA = gql`
+  query ListBuildingMetadata {
+    listBuildingMetadata {
+      key
+      buildingKey
+      relativeX
+      relativeY
+      width
+      depth
+      height
+      rotation
+      building {
+        key
+        name
+      }
+    }
+  }
+`;
+
+export const CREATE_BUILDING_METADATA = gql`
+  mutation CreateBuildingMetadata($inputs: [BuildingMetadataInput!]!) {
+    createBuildingMetadata(inputs: $inputs)
+  }
+`;
+
+export const DELETE_BUILDING_METADATA = gql`
+  mutation DeleteBuildingMetadata($key: ID!) {
+    deleteBuildingMetadata(key: $key)
+  }
+`;
+
+export const UPDATE_BUILDING_METADATA = gql`
+  mutation UpdateBuildingMetadata($key: ID!, $replacements: JSON!) {
+    updateBuildingMetadata(key: $key, replacements: $replacements)
   }
 `;
 

@@ -14,6 +14,25 @@ class TableRegistry(enum.Enum):
         foreign_models=(shared.model.CampusResponse,),
         attr={"name": "NOT NULL"},
     )
+    BUILDING_METADATA = Table(
+        primary_model=shared.model.BuildingMetadataResponse,
+        name="BuildingMetadata",
+        foreign_models=(shared.model.BuildingResponse,),
+        attr={
+            "building_key": "NOT NULL UNIQUE",
+            "relative_x": "NOT NULL",
+            "relative_y": "NOT NULL",
+            "width": "NOT NULL",
+            "depth": "NOT NULL",
+            "height": "NOT NULL",
+            "rotation": "NOT NULL DEFAULT 0.0",
+        },
+        constraints=[
+            "CHECK (width > 0)",
+            "CHECK (depth > 0)",
+            "CHECK (height > 0)",
+        ],
+    )
     BUILDING_EDGE = Table(
         primary_model=shared.model.BuildingEdgeResponse,
         name="BuildingEdge",

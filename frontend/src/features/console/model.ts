@@ -1,6 +1,7 @@
 export type ModelType =
   | 'CAMPUS'
   | 'BUILDING'
+  | 'BUILDING_METADATA'
   | 'BUILDING_EDGE'
   | 'ROOM'
   | 'PERSON'

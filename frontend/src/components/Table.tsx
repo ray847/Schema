@@ -51,6 +51,7 @@ interface TableProps<T extends { key: string } = any> {
   onInsertDataChange?: (data: Record<string, any>) => void;
   onSelect?: (item: T) => void;
   selectedKey?: string;
+  showKey?: boolean;
 }
 
 const actionCellVisible = (
@@ -86,10 +87,13 @@ export function Table<T extends { key: string } = any>({
   onInsertDataChange,
   onSelect,
   selectedKey,
+  showKey = false,
 }: TableProps<T>) {
   const [internalInsertData, setInternalInsertData] = useState<Record<string, any>>({});
   const [internalEditData, setInternalEditData] = useState<Record<string, any>>({});
-  const visibleColumns = columns.filter((col) => col.header.toLowerCase() !== 'key');
+  const visibleColumns = showKey
+    ? columns
+    : columns.filter((col) => col.header.toLowerCase() !== 'key');
   const showActions = actionCellVisible(onInsert, onSelect, onDelete, onUndoDelete, onEdit, onUndoUpdate);
 
   const insertData = externalInsertData || internalInsertData;

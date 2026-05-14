@@ -41,7 +41,25 @@ export function LoginPage() {
   };
 
   const content = (
-    <Paper aria-labelledby="auth-title" component="section" elevation={3} sx={{ maxWidth: 460, p: 4, width: 1 }}>
+    <Paper
+      aria-labelledby="auth-title"
+      component="section"
+      elevation={3}
+      sx={{
+        maxWidth: 460,
+        p: 4,
+        width: 1,
+        '@media (max-width: 600px) and (orientation: portrait)': {
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+          height: 'calc(50svh - 8px)',
+          maxHeight: 'calc(50svh - 8px)',
+          maxWidth: 'none',
+          overflowY: 'auto',
+          p: 2,
+        },
+      }}
+    >
       <Stack spacing={3}>
         <Box>
           <Typography color="text.secondary" sx={{ fontWeight: 800, letterSpacing: 1.2 }} variant="overline">

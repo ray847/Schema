@@ -4,6 +4,7 @@ import {
   CREATE_ALLOCATION,
   CREATE_BUILDING,
   CREATE_BUILDING_EDGE,
+  CREATE_BUILDING_METADATA,
   CREATE_CAMPUS,
   CREATE_COURSE,
   CREATE_COURSE_TEACHER,
@@ -14,6 +15,7 @@ import {
   DELETE_ALLOCATION,
   DELETE_BUILDING,
   DELETE_BUILDING_EDGE,
+  DELETE_BUILDING_METADATA,
   DELETE_CAMPUS,
   DELETE_COURSE,
   DELETE_COURSE_TEACHER,
@@ -24,6 +26,7 @@ import {
   LIST_ALLOCATION,
   LIST_BUILDING,
   LIST_BUILDING_EDGE,
+  LIST_BUILDING_METADATA,
   LIST_CAMPUS,
   LIST_COURSE,
   LIST_COURSE_TEACHER,
@@ -34,6 +37,7 @@ import {
   UPDATE_ALLOCATION,
   UPDATE_BUILDING,
   UPDATE_BUILDING_EDGE,
+  UPDATE_BUILDING_METADATA,
   UPDATE_CAMPUS,
   UPDATE_COURSE,
   UPDATE_COURSE_TEACHER,
@@ -65,9 +69,13 @@ export function useConsoleData({
   });
   const buildingQuery = useQuery<any>(LIST_BUILDING, {
     skip: selectedModel !== 'BUILDING'
+      && selectedModel !== 'BUILDING_METADATA'
       && selectedModel !== 'BUILDING_EDGE'
       && selectionModel !== 'BUILDING'
       && selectedModel !== 'PREFERENCE',
+  });
+  const buildingMetadataQuery = useQuery<any>(LIST_BUILDING_METADATA, {
+    skip: selectedModel !== 'BUILDING_METADATA',
   });
   const buildingEdgeQuery = useQuery<any>(LIST_BUILDING_EDGE, {
     skip: selectedModel !== 'BUILDING_EDGE',
@@ -122,6 +130,16 @@ export function useConsoleData({
   });
   const [updateBuilding] = useMutation(UPDATE_BUILDING, {
     refetchQueries: [{ query: LIST_BUILDING }],
+  });
+
+  const [createBuildingMetadata] = useMutation(CREATE_BUILDING_METADATA, {
+    refetchQueries: [{ query: LIST_BUILDING_METADATA }],
+  });
+  const [deleteBuildingMetadata] = useMutation(DELETE_BUILDING_METADATA, {
+    refetchQueries: [{ query: LIST_BUILDING_METADATA }],
+  });
+  const [updateBuildingMetadata] = useMutation(UPDATE_BUILDING_METADATA, {
+    refetchQueries: [{ query: LIST_BUILDING_METADATA }],
   });
 
   const [createBuildingEdge] = useMutation(CREATE_BUILDING_EDGE, {
@@ -202,6 +220,7 @@ export function useConsoleData({
     queries: {
       campusQuery,
       buildingQuery,
+      buildingMetadataQuery,
       buildingEdgeQuery,
       roomQuery,
       personQuery,
@@ -218,6 +237,9 @@ export function useConsoleData({
       createBuilding,
       deleteBuilding,
       updateBuilding,
+      createBuildingMetadata,
+      deleteBuildingMetadata,
+      updateBuildingMetadata,
       createBuildingEdge,
       deleteBuildingEdge,
       updateBuildingEdge,

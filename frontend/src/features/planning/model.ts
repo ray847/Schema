@@ -6,6 +6,7 @@ import {
 } from '../../domain';
 import type {
   BuildingEdgeModel,
+  CampusModel,
   PreferenceModel,
   RoomModel,
   RoomType,
@@ -35,6 +36,10 @@ export interface PlanningRoomsData {
   listRoom: RoomModel[];
 }
 
+export interface PlanningCampusesData {
+  listCampus: CampusModel[];
+}
+
 export interface PlanningPreferenceData {
   listPreference: PreferenceModel[];
 }
@@ -47,8 +52,20 @@ export interface PlanningPreferenceVars {
   userKey: string;
 }
 
+const createTaskId = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  const random = globalThis.crypto?.getRandomValues
+    ? globalThis.crypto.getRandomValues(new Uint32Array(2)).join('-')
+    : Math.random().toString(36).slice(2);
+
+  return `task-${Date.now()}-${random}`;
+};
+
 export const defaultTask = (index: number): TaskDraft => ({
-  id: crypto.randomUUID(),
+  id: createTaskId(),
   name: `Task ${index}`,
   start: '08:00',
   end: '18:00',
