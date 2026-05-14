@@ -9,7 +9,6 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { NavBar, NAV_BAR_EDGE_SIZE, type NavBarItem } from './components/NavBar';
 import { useAuth } from './features/authentication';
 import {
-  defaultTask,
   type TaskDraft,
   usePlanningCampuses,
 } from './features/planning';
@@ -48,10 +47,7 @@ function App({ accentColor, onAccentColorChange }: AppProps) {
   const [routeBuildingKeys, setRouteBuildingKeys] = useState<string[]>([]);
   const [planningMode, setPlanningMode] = useState<PlanningMode>('input');
   const [planningSolution, setPlanningSolution] = useState<Solution | null>(null);
-  const [planningTaskDrafts, setPlanningTaskDrafts] = useState<TaskDraft[]>([
-    defaultTask(1),
-    defaultTask(2),
-  ]);
+  const [planningTaskDrafts, setPlanningTaskDrafts] = useState<TaskDraft[]>([]);
   const campuses = campusQuery.data?.listCampus ?? [];
   const selectedCampus =
     campuses.find((campus) => campus.key === selectedCampusKey) ??

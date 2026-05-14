@@ -12,11 +12,12 @@
 ## Quality of Life
 
 * Paged quering for console view.
-* User presets / template for tasks.
+* ~~User presets / template for tasks.~~
 * Visualization for the routing algorithm.
+* ~~Remove metadata tables from standard & spectate user console.~~
+* More consistent styling.
 
 ## Bug
 
-* Frontend edited rows shows old data.
 * Optimize room fetching during training to only include timeframe possible ones.
-* Route planning doesn't work: set first task start time to 9 am.
+* ~~Route planning doesn't work: set first task start time to 9 am.~~

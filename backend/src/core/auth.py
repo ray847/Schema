@@ -16,6 +16,8 @@ from shared.model import UserPublic, UserResponse, UserType
 password_hash = PasswordHash.recommended()
 DUMMY_HASH = password_hash.hash("dummy-password")
 JWT_SECRET_KEY = secrets.token_urlsafe(32)
+USER_KEY_MIN = 1_000_000_000
+USER_KEY_MAX = 9_999_999_999
 
 
 @contextmanager
@@ -87,6 +89,21 @@ WHERE key = ?
     return _user_response_from_row(row) if row else None
 
 
+def _generate_user_key(conn: sqlite3.Connection) -> int:
+    for _ in range(32):
+        candidate = USER_KEY_MIN + secrets.randbelow(USER_KEY_MAX - USER_KEY_MIN + 1)
+        exists = conn.execute(
+            "SELECT EXISTS(SELECT 1 FROM user WHERE key = ?)",
+            (candidate,),
+        ).fetchone()[0]
+        if not exists:
+            return candidate
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Could not allocate a user key",
+    )
+
+
 def register_user(email: str, password: str) -> UserPublic:
     hashed_password = get_password_hash(password)
 
@@ -97,12 +114,13 @@ def register_user(email: str, password: str) -> UserPublic:
                 "SELECT EXISTS(SELECT 1 FROM user LIMIT 1)"
             ).fetchone()[0]
             user_type = UserType.STANDARD if has_users else UserType.ADMIN
-            cursor = conn.execute(
+            user_key = _generate_user_key(conn)
+            conn.execute(
                 """
-INSERT INTO user (email, password_hash, type)
-VALUES (?, ?, ?)
+INSERT INTO user (key, email, password_hash, type)
+VALUES (?, ?, ?, ?)
 """,
-                (email, hashed_password, user_type.value),
+                (user_key, email, hashed_password, user_type.value),
             )
             row = conn.execute(
                 """
@@ -110,7 +128,7 @@ SELECT key, person_key, email, password_hash, type
 FROM user
 WHERE key = ?
 """,
-                (cursor.lastrowid,),
+                (user_key,),
             ).fetchone()
             conn.commit()
         except sqlite3.IntegrityError as error:

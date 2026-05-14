@@ -34,6 +34,11 @@ import {
   type TaskDraft,
   usePlanningData,
 } from '../features/planning';
+import {
+  taskFromTemplateDraft,
+  useTaskTemplates,
+} from '../features/taskTemplates';
+import { Tile } from '../components/Tile';
 import type { RoomModel, RoomType } from '../shared';
 
 interface PlanPageProps {
@@ -62,10 +67,12 @@ export function PlanPage({
   const { user } = useAuth();
   const [solveError, setSolveError] = useState<string | null>(null);
   const [solving, setSolving] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
   const { campusQuery, buildingEdgeQuery, preferenceQuery } = usePlanningData(
     user?.key,
   );
+  const { templates: taskTemplates } = useTaskTemplates(user?.key);
 
   const campuses = campusQuery.data?.listCampus ?? [];
   const buildingEdges = buildingEdgeQuery.data?.listBuildingEdge ?? [];
@@ -108,6 +115,19 @@ export function PlanPage({
     });
   }, [solution, taskDrafts, taskRooms]);
 
+  const formatScore = (value: number) => value.toFixed(2);
+  const formatTravelDuration = (seconds: number) => {
+    if (!Number.isFinite(seconds)) return 'unreachable';
+    const minutes = Math.round(seconds / 60);
+    if (minutes < 60) return `${minutes} min`;
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes === 0
+      ? `${hours} hr`
+      : `${hours} hr ${remainingMinutes} min`;
+  };
+
   useEffect(() => {
     if (!solution) {
       onRouteBuildingKeysChange([]);
@@ -135,6 +155,22 @@ export function PlanPage({
 
   const addTask = () => {
     onTaskDraftsChange([...taskDrafts, defaultTask(taskDrafts.length + 1)]);
+    onSolutionChange(null);
+    onModeChange('input');
+  };
+
+  const addTaskFromTemplate = () => {
+    const template = taskTemplates.find((candidate) => candidate.id === selectedTemplateId);
+    if (!template) return;
+
+    onTaskDraftsChange([
+      ...taskDrafts,
+      taskFromTemplateDraft(
+        template,
+        defaultTask(taskDrafts.length + 1).id,
+        taskDrafts.length + 1,
+      ),
+    ]);
     onSolutionChange(null);
     onModeChange('input');
   };
@@ -190,12 +226,9 @@ export function PlanPage({
   };
 
   return (
-    <Paper
+    <Tile
       component="section"
-      elevation={0}
       sx={{
-        border: 1,
-        borderColor: 'divider',
         boxSizing: 'border-box',
         maxHeight: {
           xs: 'calc(50svh - 8px)',
@@ -269,7 +302,7 @@ export function PlanPage({
                 <Box>
                   <Typography variant="h6">Best route</Typography>
                   <Typography color="text.secondary" variant="body2">
-                    Score: {solution?.score.toFixed(2)}
+                    Score: {formatScore(solution.score)} = Facility {formatScore(solution.scoreComponents.facility)} + Preference {formatScore(solution.scoreComponents.preference)} + Room type {formatScore(solution.scoreComponents.roomType)} + Travel {formatScore(solution.scoreComponents.travel)}
                   </Typography>
                 </Box>
                 <Button onClick={() => onModeChange('input')} variant="outlined">
@@ -277,8 +310,16 @@ export function PlanPage({
                 </Button>
               </Stack>
               <Divider />
-              {selectedRooms.map(({ room, start, task }, index) => (
-                <Paper key={`${task.id}-${room?.key ?? index}`} variant="outlined" sx={{ p: 2 }}>
+              {selectedRooms.map(({ room, start, task }, index) => {
+                const previousLeg = index > 0 ? solution.travelLegs[index - 1] : undefined;
+                return (
+                <Stack key={`${task.id}-${room?.key ?? index}`} spacing={1}>
+                  {previousLeg?.roomChanged && (
+                    <Typography color="text.secondary" variant="caption">
+                      Travel from previous room: {formatTravelDuration(previousLeg.seconds)}
+                    </Typography>
+                  )}
+                <Paper variant="outlined" sx={{ p: 2 }}>
                   <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ alignItems: { md: 'center' }, justifyContent: 'space-between' }}>
                     <Box>
                       <Typography variant="subtitle1">{task.name}</Typography>
@@ -294,7 +335,9 @@ export function PlanPage({
                     </Box>
                   </Stack>
                 </Paper>
-              ))}
+                </Stack>
+                );
+              })}
             </Stack>
           )}
 
@@ -344,9 +387,17 @@ export function PlanPage({
                       type="number"
                       value={task.duration}
                     />
+                    <TextField
+                      label="Power outlet weight"
+                      onChange={(event) => updateTask(task.id, { powerOutletRequirement: Number(event.target.value) })}
+                      size="small"
+                      slotProps={{ htmlInput: { max: 1, min: 0, step: 0.1 } }}
+                      sx={{ flex: '1 1 150px' }}
+                      type="number"
+                      value={task.powerOutletRequirement}
+                    />
                     <IconButton
                       aria-label={`Remove ${task.name}`}
-                      disabled={taskDrafts.length <= 1}
                       onClick={() => removeTask(task.id)}
                     >
                       <DeleteIcon />
@@ -386,12 +437,38 @@ export function PlanPage({
               </Paper>
             ))}
 
+            {user && taskTemplates.length > 0 && (
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <FormControl size="small" sx={{ minWidth: 220 }}>
+                  <InputLabel>Task template</InputLabel>
+                  <Select
+                    label="Task template"
+                    onChange={(event) => setSelectedTemplateId(event.target.value)}
+                    value={selectedTemplateId}
+                  >
+                    {taskTemplates.map((template) => (
+                      <MenuItem key={template.id} value={template.id}>
+                        {template.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button
+                  disabled={!selectedTemplateId}
+                  onClick={addTaskFromTemplate}
+                  variant="outlined"
+                >
+                  Add from template
+                </Button>
+              </Stack>
+            )}
+
             <Stack direction="row" spacing={1}>
               <Button onClick={addTask} startIcon={<AddIcon />} variant="outlined">
                 Add task
               </Button>
               <Button
-                disabled={campusQuery.loading || buildingEdgeQuery.loading || solving}
+                disabled={taskDrafts.length === 0 || campusQuery.loading || buildingEdgeQuery.loading || solving}
                 onClick={runSolver}
                 startIcon={<RouteIcon />}
                 variant="contained"
@@ -436,6 +513,6 @@ export function PlanPage({
           </Stack>
         </Box>
       </Stack>
-    </Paper>
+    </Tile>
   );
 }

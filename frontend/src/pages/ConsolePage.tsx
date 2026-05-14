@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Alert, Button, Stack } from '@mui/material';
+import { Alert, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 import type { CurrentUser } from '../api/authentication';
 import { Table } from '../components/Table';
-import { Selector } from '../components/Selector';
 import { Popout } from '../components/Popout';
+import { Tile } from '../components/Tile';
 import {
   type ModelType,
   type PreferenceTargetType,
@@ -40,9 +40,17 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
     { value: 'PERSON', label: 'People' }, { value: 'COURSE', label: 'Courses' }, { value: 'ACTIVITY', label: 'Activities' },
     { value: 'COURSE_TEACHER', label: 'Course Teachers' }, { value: 'ALLOCATION', label: 'Allocations' },
   ];
+  const adminOnlyModels = new Set<ModelType>([
+    'BUILDING_METADATA',
+    'BUILDING_EDGE',
+    'PERSON',
+    'ALLOCATION',
+  ]);
   const options = preferenceOnly
     ? [{ value: 'PREFERENCE' as const, label: 'Preferences' }]
-    : baseOptions;
+    : editable
+      ? baseOptions
+      : baseOptions.filter((option) => !adminOnlyModels.has(option.value));
   const canModifySelectedModel = editable || (selectedModel === 'PREFERENCE' && !!currentUser);
   const preferenceUserKey = currentUser ? String(currentUser.key) : '';
 
@@ -56,6 +64,11 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
       setSelectedModel('CAMPUS');
     }
   }, [currentUser, preferenceOnly, selectedModel]);
+  useEffect(() => {
+    if (!options.some((option) => option.value === selectedModel)) {
+      setSelectedModel(options[0]?.value ?? 'CAMPUS');
+    }
+  }, [options, selectedModel]);
 
   const { queries, mutations } = useConsoleData({
     currentUserKey: preferenceUserKey,
@@ -671,11 +684,28 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
 
   return (
     <div className="space-y-8">
-      {!preferenceOnly && <Selector value={selectedModel} options={options} onChange={setSelectedModel} intent="primary" />}
-      <section>
+      <Tile component="section">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-baseline gap-3">
-            <h2 className="text-xl font-semibold tracking-tight text-gray-800">{options.find(opt => opt.value === selectedModel)?.label}</h2>
+            {preferenceOnly ? (
+              <h2 className="text-xl font-semibold tracking-tight text-gray-800">{options.find(opt => opt.value === selectedModel)?.label}</h2>
+            ) : (
+              <FormControl size="small" sx={{ minWidth: 240 }}>
+                <InputLabel id="console-table-select-label">Table</InputLabel>
+                <Select
+                  label="Table"
+                  labelId="console-table-select-label"
+                  onChange={(event) => setSelectedModel(event.target.value as ModelType)}
+                  value={selectedModel}
+                >
+                  {options.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
             {hasTotalPending && (
               <div className="flex gap-2">
                 {hasPendingChanges && <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">{pendingChanges[selectedModel].length} pending insert</span>}
@@ -709,7 +739,7 @@ export function ConsoleView({ editable = false, currentUser = null, preferenceOn
         </div>
         {csvImportError && <Alert severity="error" sx={{ mb: 2 }}>{csvImportError}</Alert>}
         {renderContent()}
-      </section>
+      </Tile>
       <Popout isOpen={selectionConfig.isOpen} onClose={() => setSelectionConfig({ ...selectionConfig, isOpen: false })} title={selectionConfig.title} className="max-w-4xl"><div className="space-y-4"><p className="text-sm text-gray-600">Please select an entry to populate the field.</p><div className="border border-gray-100 rounded-xl overflow-hidden shadow-inner bg-gray-50/30">{renderSelectionTable()}</div></div></Popout>
     </div>
   );

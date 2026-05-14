@@ -8,9 +8,22 @@ type TaskIdx = number;
 type RoomIdx = number;
 export type Solution = {
   score: number,
+  scoreComponents: {
+    facility: Score,
+    preference: Score,
+    roomType: Score,
+    travel: Score,
+  },
   route: RoomIdx[],
   startTimes: Time[],
   taskSeq: TaskIdx[],
+  travelLegs: {
+    fromStep: number,
+    toStep: number,
+    roomChanged: boolean,
+    score: Score,
+    seconds: number,
+  }[],
 };
 type BestRoomEntry = [Time, Score | null, RoomIdx | null];
 
@@ -176,33 +189,138 @@ class Solver {
         taskSeq.pop();
       }
     else { // end of recursion
-      var roomSeq: RoomIdx[] = [];
-      // room score (facility & preference)
-      var roomScore: Score = 0.0;
-      for (var i = 0; i < taskSeq.length; ++i) {
-        let task = taskSeq[i];
-        let bestRoom = this.bestRoomAt(task, startTimes[i]);
-        if (!bestRoom || bestRoom[1] == null || bestRoom[2] == null) return; // no rooms
-        roomScore += bestRoom[1];
-        roomSeq.push(bestRoom[2]);
+      const candidateSolution = this.bestRoomRoute(taskSeq, startTimes);
+      if (!candidateSolution) return;
+      if (this.isBetterSolution(candidateSolution, this.bestSolution)) {
+        this.bestSolution = candidateSolution;
       }
-      // traveling score
-      var travelScore: Score = 0.0;
-      for (var i = 0; i < taskSeq.length - 1; ++i) {
-        let from = this.rooms[taskSeq[i]][roomSeq[i]];
-        let to = this.rooms[taskSeq[i + 1]][roomSeq[i + 1]];
-        travelScore += this.scorer.scoreTravel(from, to);
-      }
-      if (!Number.isFinite(travelScore)) return;
-      const routeScore = this.scorer.scoreRoute(roomScore, travelScore);
-      if (this.bestSolution == null || routeScore > this.bestSolution.score)
-        this.bestSolution = {
-          score: routeScore,
-          route: [...roomSeq],
+    }
+  }
+
+  private bestRoomRoute(
+    taskSeq: TaskIdx[],
+    startTimes: Time[],
+  ): Solution | null {
+    let bestSolution: Solution | null = null;
+    const route: RoomIdx[] = [];
+    const travelLegs: Solution["travelLegs"] = [];
+    const scoreComponents: Solution["scoreComponents"] = {
+      facility: 0,
+      preference: 0,
+      roomType: 0,
+      travel: 0,
+    };
+
+    const recurse = (step: number) => {
+      if (step === taskSeq.length) {
+        const roomScore =
+          scoreComponents.facility +
+          scoreComponents.preference +
+          scoreComponents.roomType;
+        const score = this.scorer.scoreRoute(roomScore, scoreComponents.travel);
+        const candidate: Solution = {
+          score,
+          scoreComponents: { ...scoreComponents },
+          route: [...route],
           startTimes: [...startTimes],
           taskSeq: [...taskSeq],
+          travelLegs: [...travelLegs],
         };
+
+        if (this.isBetterSolution(candidate, bestSolution)) {
+          bestSolution = candidate;
+        }
+        return;
+      }
+
+      const taskIdx = taskSeq[step];
+      const startTime = startTimes[step];
+      const candidateRooms = this.availableRoomsAt(taskIdx, startTime);
+      for (const roomIdx of candidateRooms) {
+        const room = this.rooms[taskIdx][roomIdx];
+        const roomComponents = this.scorer.scoreRoomComponents(
+          room,
+          this.tasks[taskIdx].constraint,
+        );
+        let leg: Solution["travelLegs"][number] | null = null;
+
+        if (step > 0) {
+          const previousTaskIdx = taskSeq[step - 1];
+          const previousRoom = this.rooms[previousTaskIdx][route[step - 1]];
+          const legScore = this.scorer.scoreTravel(previousRoom, room);
+          if (!Number.isFinite(legScore)) continue;
+
+          leg = {
+            fromStep: step - 1,
+            toStep: step,
+            roomChanged: String(previousRoom.key) !== String(room.key),
+            score: legScore,
+            seconds: this.scorer.travelSecondsBetweenRooms(previousRoom, room),
+          };
+          scoreComponents.travel += leg.score;
+          travelLegs.push(leg);
+        }
+
+        scoreComponents.facility += roomComponents.facility;
+        scoreComponents.preference += roomComponents.preference;
+        scoreComponents.roomType += roomComponents.roomType;
+        route.push(roomIdx);
+
+        recurse(step + 1);
+
+        route.pop();
+        scoreComponents.facility -= roomComponents.facility;
+        scoreComponents.preference -= roomComponents.preference;
+        scoreComponents.roomType -= roomComponents.roomType;
+        if (leg) {
+          travelLegs.pop();
+          scoreComponents.travel -= leg.score;
+        }
+      }
+    };
+
+    recurse(0);
+    return bestSolution;
+  }
+
+  private availableRoomsAt(task: TaskIdx, startTime: Time): RoomIdx[] {
+    const duration = this.tasks[task].constraint.time.duration;
+    return range(0, this.rooms[task].length).filter(
+      roomIdx =>
+        this.intervals[task][roomIdx][0] <= startTime &&
+        this.intervals[task][roomIdx][1] - startTime >= duration
+    );
+  }
+
+  private isBetterSolution(
+    candidate: Solution,
+    current: Solution | null,
+  ): boolean {
+    if (current == null) return true;
+
+    const epsilon = 1e-9;
+    if (candidate.score > current.score + epsilon) return true;
+    if (candidate.score < current.score - epsilon) return false;
+
+    const candidateFinish = this.solutionFinishTime(candidate);
+    const currentFinish = this.solutionFinishTime(current);
+    if (candidateFinish !== currentFinish) {
+      return candidateFinish < currentFinish;
     }
+
+    return this.solutionStartTime(candidate) < this.solutionStartTime(current);
+  }
+
+  private solutionFinishTime(solution: Solution): Time {
+    const lastIdx = solution.taskSeq.length - 1;
+    if (lastIdx < 0) return 0;
+    const lastTask = solution.taskSeq[lastIdx];
+    return solution.startTimes[lastIdx] +
+      this.tasks[lastTask].constraint.time.duration;
+  }
+
+  private solutionStartTime(solution: Solution): Time {
+    return solution.startTimes[0] ?? 0;
   }
 
   bestRoomAt(task: TaskIdx, startTime: Time): BestRoomEntry | undefined {

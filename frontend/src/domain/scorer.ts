@@ -7,6 +7,12 @@ import {
 
 export type Score = number;
 
+export interface RoomScoreComponents {
+  facility: Score;
+  preference: Score;
+  roomType: Score;
+}
+
 export class Scorer {
   readonly graph: number[][];
   readonly buildingKeyToIndex: Map<string, number>;
@@ -37,6 +43,11 @@ export class Scorer {
   }
 
   scoreRoom(room: RoomModel, constraint: Constraint): Score {
+    const components = this.scoreRoomComponents(room, constraint);
+    return components.roomType + components.preference + components.facility;
+  }
+
+  scoreRoomComponents(room: RoomModel, constraint: Constraint): RoomScoreComponents {
     // Room Type Score
     var roomTypeScore: Score = 0;
     if (constraint.roomType instanceof RoomTypePosConstraint)
@@ -59,20 +70,53 @@ export class Scorer {
       }
     }
 
-    return this.weights.type * roomTypeScore +
-      this.weights.preference * preferenceScore;
+    const facilityScore = this.scoreFacility(room, constraint);
+
+    return {
+      facility: this.weights.facility * facilityScore,
+      preference: this.weights.preference * preferenceScore,
+      roomType: this.weights.type * roomTypeScore,
+    };
+  }
+
+  private scoreFacility(room: RoomModel, constraint: Constraint): Score {
+    const requiredPowerOutlets = constraint.facility?.power_outlet ?? 0;
+    const roomPowerOutlets = this.numericFacilityValue(
+      room.facility,
+      "power_outlet",
+    );
+
+    return requiredPowerOutlets * roomPowerOutlets;
+  }
+
+  private numericFacilityValue(
+    facility: RoomModel["facility"],
+    key: string,
+  ): number {
+    if (facility == null || typeof facility !== "object") return 0;
+
+    const value = (facility as Record<string, unknown>)[key];
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
   }
 
   scoreTravel(room1: RoomModel, room2: RoomModel): Score {
+    const travelSeconds = this.travelSecondsBetweenRooms(room1, room2);
+
+    if (!Number.isFinite(travelSeconds)) return Number.NEGATIVE_INFINITY;
+    return -travelSeconds / 60;
+  }
+
+  travelSecondsBetweenRooms(room1: RoomModel, room2: RoomModel): number {
     const buildingTravelSeconds = this.travelSeconds(
       room1.buildingKey,
       room2.buildingKey,
     );
-    const travelSeconds = buildingTravelSeconds +
-      this.floorTransitionSeconds(room1, room2);
-
-    if (!Number.isFinite(travelSeconds)) return Number.NEGATIVE_INFINITY;
-    return -travelSeconds / 60;
+    return buildingTravelSeconds + this.floorTransitionSeconds(room1, room2);
   }
 
   scoreRoute(roomScore: Score, travelScore: Score): Score {

@@ -1,4 +1,5 @@
-import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Tile } from '../components/Tile';
 
 interface SettingsPageProps {
   accentColor: string;
@@ -19,7 +20,7 @@ export function SettingsPage({
   onAccentColorChange,
 }: SettingsPageProps) {
   return (
-    <Paper component="section" elevation={0} sx={{ border: 1, borderColor: 'divider', p: 3 }} aria-labelledby="settings-title">
+    <Tile component="section" aria-labelledby="settings-title">
       <Stack spacing={3}>
         <Box>
           <Typography color="text.secondary" sx={{ fontWeight: 800, letterSpacing: 1.2 }} variant="overline">
@@ -67,6 +68,6 @@ export function SettingsPage({
           </Stack>
         </Stack>
       </Stack>
-    </Paper>
+    </Tile>
   );
 }

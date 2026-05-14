@@ -3,13 +3,13 @@ import {
   Alert,
   Box,
   Button,
-  Paper,
   Stack,
   Tab,
   Tabs,
   TextField,
   Typography,
 } from '@mui/material';
+import { Tile } from '../components/Tile';
 import { useAuth } from '../features/authentication';
 
 type AuthMode = 'login' | 'register';
@@ -41,10 +41,9 @@ export function LoginPage() {
   };
 
   const content = (
-    <Paper
+    <Tile
       aria-labelledby="auth-title"
       component="section"
-      elevation={3}
       sx={{
         maxWidth: 460,
         p: 4,
@@ -117,7 +116,7 @@ export function LoginPage() {
           </Button>
         </Stack>
       </Stack>
-    </Paper>
+    </Tile>
   );
 
   return content;

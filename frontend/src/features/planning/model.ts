@@ -1,5 +1,6 @@
 import {
   Constraint,
+  FacilityConstraint,
   RoomTypeNegConstraint,
   RoomTypePosConstraint,
   Task,
@@ -28,6 +29,7 @@ export interface TaskDraft {
   start: string;
   end: string;
   duration: number;
+  powerOutletRequirement: number;
   roomTypeMode: RoomTypeMode;
   roomTypes: RoomType[];
 }
@@ -70,6 +72,7 @@ export const defaultTask = (index: number): TaskDraft => ({
   start: '08:00',
   end: '18:00',
   duration: 60,
+  powerOutletRequirement: 0,
   roomTypeMode: 'any',
   roomTypes: [],
 });
@@ -108,6 +111,13 @@ export const buildTask = (draft: TaskDraft) => {
     const roomType = new RoomTypeNegConstraint();
     roomType.types = draft.roomTypes;
     constraint.roomType = roomType;
+  }
+
+  const powerOutletRequirement = Math.max(0, Math.min(1, draft.powerOutletRequirement));
+  if (powerOutletRequirement > 0) {
+    const facility = new FacilityConstraint();
+    facility.power_outlet = powerOutletRequirement;
+    constraint.facility = facility;
   }
 
   task.constraint = constraint;
